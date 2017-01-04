@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <cstring>
+#include <vector>
 using namespace std;
 
 // 使用 ! 表示重要程度,! 越多越重要
@@ -123,6 +124,64 @@ int main(){
     while (bd != ed)
         cout << *bd++;
     cout << endl;
+
+//    ! 使用数组初始化vector
+    pIndexofTest(13);
+    int arr7[] = {1,2,3,4,5,6,7};
+    vector <int> vArr1(arr7,arr7 + 7);//使用首尾指针初始化
+    vector <int> vArr2(begin(arr7),end(arr7));//使用标准库中的函数获取首尾指针
+    vector <int> vArr3(arr7 + 1,arr7 + 3);//也可以只初始化一段
+    for (auto a : vArr1)
+        cout << a << " ";
+    cout << endl;
+    for (auto a : vArr2)
+        cout << a << " ";
+    cout << endl;
+    for (auto a : vArr3)
+        cout << a << " ";
+    cout << endl;
+
+//    !! 范围for处理多维数组,注意第一种错误写法,错误的原因是什么?
+    pIndexofTest(14);
+    int arr8[3][3] = {1,2,3,4,5,6,7,8,9};
+//    for (auto row : arr8) {//考虑这种写法出错的原因:row 其实是个int * 的指针,auto 获得是 数组首元素的指针。但是为什么加个 & 就可以了呢?原理是什么?
+//        for (auto &col : row) {
+//            cout << col << " ";
+//        }
+//        cout << endl;
+//    }
+    for (auto &row : arr8) {
+        for (auto &col : row) {
+            cout << col << " ";
+        }
+        cout << endl;
+    }
+    cout << endl;
+
+//    课本练习3.43,非常好的几个习题。多维数组是数组的数组,只有懂了这一点,这题写起来就很轻松。
+    pIndexofTest(15);
+    int arr9[2][3] = {1,2,3,4,5,6};
+    for (auto row = arr9; row != arr9 + 2; ++row){
+        for (auto col = *row; col != *row + 3; ++ col){//考虑此处为啥是*row而不是row
+            cout << *col << " ";
+        }
+        cout << endl;
+    }
+    cout << endl;
+    for (auto row = begin(arr9); row != end(arr9); ++row){
+        for (auto col = begin(*row); col != end(*row); ++ col){
+            cout << *col << " ";
+        }
+        cout << endl;
+    }
+    cout << endl;
+    using aliasArr = int [3];
+    for (aliasArr *p = arr9; p != arr9 + 2; ++p){
+        for (int *q = *p; q != *p + 3; ++q){
+            cout << *q << " ";
+        }
+        cout << endl;
+    }
 
 
 }
