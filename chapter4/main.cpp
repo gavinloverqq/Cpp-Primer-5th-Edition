@@ -142,11 +142,33 @@ int main() {
     cout << sizeof(char *) << " " << sizeof(int *) << " " << sizeof(float *) << " " << sizeof(double *) << " " << sizeof(void *) << " " << endl;
     cout << (5 / -2) << " " << (5 % -2) << endl;//商向0取整,余数和被除数同号
 
+//    算术转换
     pIndexofTest(13);
     int iVal7 = -1;
     unsigned int uiVal1 = 1;
     cout << (iVal7 * uiVal1) << endl;//有符号的会转化成无符号的数
 
+//    !!! 强制类型转换
+    pIndexofTest(14);
+//    格式:castname<type>(expr);
+    int iValSc1 = 5,iValSc2 = 3;
+    double slope = static_cast<double>(iValSc1) / iValSc2 ;//只要不包含底层const,都可以使用static_cast
+    cout << slope << endl;
+    void* pVoid = &iValSc1;//static_cast可以找回void*的值
+    cout << *static_cast<int*>(pVoid) << endl;
+    const char *pCntCh;
+    char *pCh = const_cast<char*>(pCntCh);
+//    char *pChSc = static_cast<char*>(pCntCh);//static_cast不能转化掉const性质
+    static_cast<string>(pCntCh);
+//    const_cast<string>(pCntCh);//const_cast只改变常量属性;也就是说只能改变对象底层的const
+    int iVal8 = 1,*ip1 = &iVal8;
+    char *pCh1 = reinterpret_cast<char*>(ip1);
+//    string rcStr(pCh1);
+//    cout << rcStr << endl;//会导致异常行为,exit code 11
+
+//    旧式C风格强制类型转换
+//    type(expr);//函数形式的类型转换
+//    (type)expr;//C语言风格的强制类型转换
 
 
     return 0;
