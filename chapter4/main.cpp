@@ -156,20 +156,28 @@ int main() {
     cout << slope << endl;
     void* pVoid = &iValSc1;//static_cast可以找回void*的值
     cout << *static_cast<int*>(pVoid) << endl;
+
     const char *pCntCh;
-    char *pCh = const_cast<char*>(pCntCh);
+    char *pCh = const_cast<char*>(pCntCh);//const_cast只能去掉const,前后类型其实是一样的
 //    char *pChSc = static_cast<char*>(pCntCh);//static_cast不能转化掉const性质
-    static_cast<string>(pCntCh);
-//    const_cast<string>(pCntCh);//const_cast只改变常量属性;也就是说只能改变对象底层的const
-    int iVal8 = 1,*ip1 = &iVal8;
+//    static_cast<string>(pCntCh);//书上说正确,但是运行时发生错误,exit code 11,带const 不能使用static_cast ????
+//    const_cast<string>(pCntCh);//错误,const_cast只改变常量属性;也就是说只能改变对象底层的const
+    int iVal8 = 65,*ip1 = &iVal8;
     char *pCh1 = reinterpret_cast<char*>(ip1);
-//    string rcStr(pCh1);
-//    cout << rcStr << endl;//会导致异常行为,exit code 11
+    string rcStr(pCh1);
+    cout << rcStr << endl;//会读内存里的内容,能读到A
 
 //    旧式C风格强制类型转换
 //    type(expr);//函数形式的类型转换
 //    (type)expr;//C语言风格的强制类型转换
 
-
+//    练习 4.37 a
+    {
+        const string *ps;
+        void *pv;
+//        改写下面旧式转换
+        pv = (void*)ps;
+        pv = static_cast<void*>(const_cast<string*>(ps));
+    }
     return 0;
 }
