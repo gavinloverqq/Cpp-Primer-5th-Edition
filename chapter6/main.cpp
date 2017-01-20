@@ -49,6 +49,23 @@ string::size_type findChar(const string &s, char c,string::size_type &cnt){
     return position;
 }
 
+
+//  !! 顶层const形参
+void fcn(const int i){/*fcn能传入const int 也能传入 int (忽略顶层const)*/}
+//void fcn(int i){}//此处在定义这样的函数是错误的,因为上面的函数忽略了顶层const,和这个函数一模一样,因此不能再定义
+
+
+void reset(int &i){
+    i = 0;
+}
+void reset(int *i){
+    *i = 0;
+}
+
+//  !!! 数组引用形参,两端括号必不可少
+void print(int &arr[10]){}//错误,将arr声明成了引用的数组,数组里存了10个int形的引用
+void print(int (&arr)[10]){}//正确,arr是具有10个int的int形数组的引用
+
 int main() {
 
 //    ！！！ 局部静态变量
@@ -80,6 +97,16 @@ int main() {
     poz = findChar(s,c,cnt);
     cout << poz << " " << cnt << endl;
 
+//    !!! 指针或引用参与const
+    {
+        int i = 10;
+        const int ci = i;
+        reset(&i);
+//        reset(&ci);//不能用指向const int对象的指针初始化int *
+        reset(i);
+//        reset(ci);//不能把普通指针绑定到const 对象上
+//        reset(42);//不能把普通指针绑定到字面值上
+    }
 
     return 0;
 }
