@@ -150,6 +150,67 @@ void recVec2(vector <int> vec, unsigned index){
     }
 }
 
+//  ! 仅仅返回值不同的函数不是重载,第二个声明是重复声明,是错误的。很好理解这条规则,因为你用了这个函数,但是编译器不知道你需要它返回什么,因此不知道是用哪个函数
+
+
+//  !!! 关于顶层const与底层const的一点讨论
+//  顶层const:指的是const对象是常量,底层const指的是const的指针所指对象,或者引用的对象是常量
+/*{
+//  不能删除底层const
+    int i;
+    const int &j = i;
+    const int *p = &i;
+    int &r = j, *q = p;//错误,此处删除了底层const
+
+    const int ci = 5;
+    int iVal = ci;//可以,此处删除了顶层const
+}*/
+
+//  !!! 重载与const形参
+    void fun(int i);
+    void fun(const int i);//重复声明,错误!
+    void fun(int *i);
+    void fun(int* const i);//重复声明
+
+    void fun(int* i);
+    void fun(const int *i);//新函数,作用于指向常量的指针,为什么是新函数,参看上一条,不能删除底层const,因此指针指向的常量才能传入此函数
+    void fun(int& i);
+    void fun(const int& i);//新函数,作用域常量引用
+
+
+//  !!! const cast 重载的应用
+const string& shorterStr(const string& s1,const string& s2){
+    return s1.length() < s2.length() ? s1 : s2;
+}
+//以上函数对非常量的调用返回的也是常量,因此要获得一个新函数:当非常量参数传入,返回非常量参数,常量返回常量
+string& shorterStr(string& s1,string& s2){
+    auto& r = shorterStr(const_cast<const string&>(s1), const_cast<const string&>(s2));
+    return const_cast< string& >(r);
+}
+
+//  !!! 默认实参(本节有与书中的描述不对的地方!!!!!!!!!)
+//void dfuFuc1(int a = 2,int b,string c){}//error: missing default argument on parameter 'b',//一个形参有了默认值,后面的所有值都需要有默认值,很容易理解:一旦前面有默认值后面没有默认值,那我传入函数一些参数,编译器怎么知道我前面的参数是要取代默认参数还是使用默认参数呢?如:fun(int a = 1,int b = 2,int c),调用:fun(3,5) 3传给a还是b呢?;
+void dfuFuc1(int a ,int b = 2,string c = "c"){}
+//void dfuFuc1(int ,int b = 3,string);//error: redefinition of default argument//函数声明中不能修改一个已存在的默认值
+//void dfuFuc1(int ,int b = 2,string c = "c");//错误! 此处与书中p212描述有出入!需要回头再细看!!!!!!!
+
+//  ! constexpr 函数 (与书本描述有不对的地方!!!!!!!!!)
+constexpr int newSz(){
+    return 42;
+}//函数类型、所有形参、都必须是字面值。函数体有且只有一条return,隐式的内联函数
+constexpr int foo = newSz();
+constexpr size_t scale(int cnt){//允许返回值不是一个常量
+    return cnt * newSz();
+}
+int GiVal = scale(2);//传入必须是字面值,才能得到产量表达式
+int GiVal2 = 2;
+int GiVal3 = scale(GiVal2);//书中说变量传入会错误,实际编译并没有!!!!!!
+
+//  !!! 关于内联函数为什么要放在头文件中,见习题6.43
+//  因为内联函数的定义对于编译器而言必须是可见的,编译器能够在
+
+
+
 int main() {
 
 //    ！！！ 局部静态变量
