@@ -1,6 +1,10 @@
 #include <iostream>
 #include <string>
 #include <vector>
+
+#include <cassert>
+
+//#define NDEBUG
 using namespace std;
 
 //使用 ! 表示重要程度,! 越多越重要
@@ -207,7 +211,7 @@ int GiVal2 = 2;
 int GiVal3 = scale(GiVal2);//书中说变量传入会错误,实际编译并没有!!!!!!
 
 //  !!! 关于内联函数为什么要放在头文件中,见习题6.43
-//  因为内联函数的定义对于编译器而言必须是可见的,编译器能够在
+//  因为内联函数的定义对于编译器而言必须是可见的,编译器能够在调用点内联展开该函数的代码,所以仅有函数的原型不够。内联函数与一般函数不同,内联函数有可能在程序中定义不止一次因此此时必须保证所有的源文件中定义完全相同,在头文件中可保证这一点。
 
 
 
@@ -290,7 +294,21 @@ int main() {
 //    int odd[10] = {1};
 //    decltype(odd) * func(int i);
 
-
+//    !!! assert 与NDEBUG
+    pIndexofTest(8);
+    {
+        int iVal;
+        cin >> iVal;
+        assert(iVal > 6);
+        cout << iVal << " > 6" << endl;
+//        学习几个局部静态变量,以及 cerr
+#ifdef NDEBUG
+        cerr << "Error: " << __FILE__ << " : in function " << __func__
+        << " at line " << __LINE__ << endl
+        << "       Compiled on " << __DATE__
+        << " at " << __TIME__ << endl;
+#endif
+    }
 
     return 0;
 }
