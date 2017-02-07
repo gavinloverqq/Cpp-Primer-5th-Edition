@@ -213,7 +213,45 @@ int GiVal3 = scale(GiVal2);//书中说变量传入会错误,实际编译并没�
 //  !!! 关于内联函数为什么要放在头文件中,见习题6.43
 //  因为内联函数的定义对于编译器而言必须是可见的,编译器能够在调用点内联展开该函数的代码,所以仅有函数的原型不够。内联函数与一般函数不同,内联函数有可能在程序中定义不止一次因此此时必须保证所有的源文件中定义完全相同,在头文件中可保证这一点。
 
+//    !!! 实参类型的转换(复习const类型转换 p142)
+void ff(int i){
+    cout << __func__ << "是int" << endl;
+}
+void ff(short i){
+    cout << __func__  << "是short" << endl;
+}
+void manip(long l){
+    cout << __func__  << "是long" << endl;
+}
+void manip(float f){
+    cout << __func__  << "是flaot" << endl;
+}
 
+//   !!! 函数指针
+bool lengthCompare(const string & s1, const string& s2){}//函数类型:唯一的由返回值与形参决定,与函数名无关左侧函数的类型:bool (const string&,const string& )
+bool (*pf)(const string& s1, const string& s2);//声明指向上述函数的指针,必须使用(),不加这是一个返回值是bool * 类型的函数
+//函数指针形参
+//一下是两个等价的声明,第三个参数是函数类型,自动的转换成函数指针
+void useBigger(const string& s1, const string& s2, bool (*pf)(const string&, const string&)){}
+void useBigger1(const string& s1, const string& s2, bool pf(const string&, const string&)){}
+//函数类型
+typedef bool FFunc(const string&, const string&);
+typedef decltype(lengthCompare) FFunc2;
+//指向函数指针的类型(需要注意的是,delctype返回函数类型,不会发生自动转化为函数指针类型)
+typedef bool (*FFunc3)(const string&, const string&);
+typedef decltype(lengthCompare) *FFunc4;
+//返回函数指针,和数组一样,不能返回一个函数,但是可以返回指向函数的指针
+using F = int (int*, int);
+using PF = int(*)(int*, int);//我们必须把返回类型写成指针的形式,因为编译器不会自动转换
+//几种等价定义
+PF FF1(int);
+//F FF2(int);错误,F是函数类型,FF2不能返回一个函数
+F* FF3(int);
+int (*FF4(int)) (int*, int);
+auto FF5(int) -> int (*)(int*, int);
+//使用decltype简化
+string::size_type sumLarge(const string& , const string&){}
+decltype(sumLarge) *getFcn(const string&){}
 
 int main() {
 
@@ -298,10 +336,11 @@ int main() {
     pIndexofTest(8);
     {
         int iVal;
+        cout << "输入一个大于或者小于6的数(验证assert 与 NDEBUG)" << endl;
         cin >> iVal;
         assert(iVal > 6);
         cout << iVal << " > 6" << endl;
-//        学习几个局部静态变量,以及 cerr
+//        学习几个编译器定义的局部静态变量,以及 cerr
 #ifdef NDEBUG
         cerr << "Error: " << __FILE__ << " : in function " << __func__
         << " at line " << __LINE__ << endl
@@ -309,6 +348,22 @@ int main() {
         << " at " << __TIME__ << endl;
 #endif
     }
+
+//    !!! 实参类型的转换(复习const类型转换 p142)
+    pIndexofTest(9);
+    ff('a');//char 提升至int,调用f(int)
+//    manip(3.14);//error: call to 'manip' is ambiguous//note: candidate function//错误,二义性调用
+
+
+//   !!! 函数指针
+//  两种等价的赋值,&是可选的
+    pf = lengthCompare;
+    pf = &lengthCompare;
+//  使用函数的指针调用函数,无须提前解引用指针,下面是两个等价调用
+    bool b1 = pf("hee","sss");
+    bool b2 = (*pf)("hee","sss");
+//  函数指针形参
+    useBigger("ss","s",lengthCompare);//自动将lengthCompare转化为指向该函数的指针
 
     return 0;
 }
