@@ -1,4 +1,5 @@
 #include <iostream>
+#include <vector>
 #include "Sales_item.h"
 
 using namespace std;
@@ -88,6 +89,51 @@ class Test3{
     Test3() = default;
     int iVal1 = 5;
     string str;
+};
+
+//! 练习7.25 为什么含有指针数据成员的类一般不宜使用默认的拷贝和赋值操作
+class Screen{
+public:
+    using pos = std::string::size_type;//定义类型的成员，必须先定义后使用
+
+    Screen() = default;
+    Screen(pos ht,pos wd,char c):height(ht),width(wd),contents(ht * wd,c){}
+    char get()const{
+        return contents[cursor];
+    }//隐士内联
+    inline char get(pos ht,pos wd)const;//显式内联
+    Screen& move(pos r,pos c);//能在之后设为内联
+
+    //可变数据成员
+    void changeMutFunc()const{
+        mutNum++;
+    }
+
+private:
+    pos cursor = 0;
+    pos height = 0, width = 0;
+    std::string contents;
+
+    //可变数据成员，即使对象是const，也可以被修改；
+    mutable int mutNum;
+
+};
+//声明时未设为内联
+inline Screen& Screen::move(pos r, pos c) {
+    pos row = r * width;
+    cursor = row + c;
+    return *this;
+}
+//无需在定义和声明的地方都说明inline
+char Screen::get(pos r, pos c)const{
+    pos row = r * width;
+    return contents[row + c];
+}
+
+//!类内初始值，使用{}初始化
+class Window_mgr{
+private:
+    std::vector <Screen> screens{Screen(24,80,'')};
 };
 
 int main() {
