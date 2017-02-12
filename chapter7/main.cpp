@@ -54,12 +54,14 @@ Test& Test::combine(const Test &cnt){
     return *this;
 }
 
+//流作为左值必须返回引用,要修改流,必须传入引用
 istream& read(istream& is,Test& t){
     is >> t.iVal1 >> t.iVal2 >> t.str;
     return is;
 }
 ostream& print(ostream& os,Test& t){
     os << t.iVal1 << " " << t.iVal2 << " " << t.str;
+    return os;
 }
 //!!! 思考下面两个函数的不同，有一个有错误，错在哪里！！！
 Test& add1(const Test& t1,const Test& t2){
@@ -104,9 +106,22 @@ public:
     inline char get(pos ht,pos wd)const;//显式内联
     Screen& move(pos r,pos c);//能在之后设为内联
 
+    Screen& set(char);
+    Screen& set(pos,pos,char);
+
     //可变数据成员
     void changeMutFunc()const{
         mutNum++;
+    }
+
+    //根据对象是否是const重载了display函数。
+    Screen& display(std::ostream& os){
+        doDisplay(os);
+        return *this;
+    }
+    const Screen& display(std::ostream& os)const {
+        doDisplay(os);
+        return *this;
     }
 
 private:
@@ -116,6 +131,11 @@ private:
 
     //可变数据成员，即使对象是const，也可以被修改；
     mutable int mutNum;
+
+    //常量函数
+    void doDisplay(std::ostream& os)const {
+        os << contents;
+    }
 
 };
 //声明时未设为内联
@@ -130,11 +150,32 @@ char Screen::get(pos r, pos c)const{
     return contents[row + c];
 }
 
+//以下两个函数返回的是对象本身,而不是对象副本;
+inline Screen& Screen::set(char c) {
+    contents[cursor] = c;
+    return *this;
+}
+inline Screen& Screen::set(pos r, pos col, char ch) {
+    contents[r*width + col] = ch;
+    return *this;
+}
+
 //!类内初始值，使用{}初始化
 class Window_mgr{
 private:
-    std::vector <Screen> screens{Screen(24,80,'')};
+    std::vector <Screen> screens{Screen(24,80,' ')};
 };
+
+
+//!练习7.31:定义一对类x和y,x包含指向y的指针,y包含x的对象
+class Y;
+class X{
+    Y* y;
+};
+class Y{
+    X x;
+};
+
 
 int main() {
 
@@ -172,10 +213,35 @@ int main() {
 
 //    !! 定义在类外部的构造函数，以及使用流初始化
     pIndexofTest(5);
-    {
+    /*{
         Test t(cin);
         print(cout,t) << endl;
+    }*/
+
+//    !! 返回this成员函数,(引用与非引用的区别)
+    pIndexofTest(6);
+    {
+        Screen myScreen;
+        myScreen.move(4,0).set('#');//执行顺序,从左到右//如果move返回的是Screen不是引用,则Screen temp = myScreen.move(4,0);temp.set('#'),set只能改变临时副本,不能改变myScreen的值
     }
 
+//    !!! const 成员函数返回*this (需复习书p247,以及p208)
+    pIndexofTest(7);
+    {
+
+        // 如果没有非常量版本的display函数,下面的表达会出错
+//        Screen myScreen;
+//        myScreen.display(cout).set('*');//display返回常量引用,调用set会发生错误
+//        !!! 一个const成员函数,如果以引用的形式返回*this,则返回的类型是常量引用
+
+        const Screen blank(5,3,'c');
+        Screen myScreen(5,3,'c');
+        myScreen.set('$').display(cout);//调用非常量版本
+        cout << endl;
+        blank.display(cout);//调用常量版本
+    }
+
+    pIndexofTest(8);
+    cout << "友元关系不传递" << endl;
     return 0;
 }
