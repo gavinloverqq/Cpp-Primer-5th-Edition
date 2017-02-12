@@ -15,85 +15,128 @@ void pIndexofTest(int i){
 }
 
 
+class TestA{
 
+    friend istream& read(istream& is,TestA& a);
 
-class Screen{
+    //    B类可以访问A类私有成员
+    friend class TestB;
+
 public:
-    using pos = std::string::size_type;//定义类型的成员，必须先定义后使用
-
-    Screen() = default;
-    Screen(pos ht,pos wd,char c):height(ht),width(wd),contents(ht * wd,c){}
-    char get()const{
-        return contents[cursor];
-    }//隐士内联
-    inline char get(pos ht,pos wd)const;//显式内联
-    Screen& move(pos r,pos c);//能在之后设为内联
-
-    Screen& set(char);
-    Screen& set(pos,pos,char);
-
-    //可变数据成员
-    void changeMutFunc()const{
-        mutNum++;
-    }
-
-    //根据对象是否是const重载了display函数。
-    Screen& display(std::ostream& os){
-        doDisplay(os);
-        return *this;
-    }
-    const Screen& display(std::ostream& os)const {
-        doDisplay(os);
-        return *this;
+    TestA() = default;
+    TestA(int i,int j):iVal1(i),iVal2(j){}
+    TestA(istream& is){
+        read(is,*this);
     }
 
 private:
-    pos cursor = 0;
-    pos height = 0, width = 0;
-    std::string contents;
+    int iVal1,iVal2;
+};
 
-    //可变数据成员，即使对象是const，也可以被修改；
-    mutable int mutNum;
+istream& read(istream& is,TestA& a){
+    is >> a.iVal1 >> a.iVal2;
+    return is;
+}
 
-    //常量函数
-    void doDisplay(std::ostream& os)const {
-        os << contents;
+class TestB;
+class TestD{
+public:
+    TestD() = default;
+    TestD(int i,int j):iVal1(i),iVal2(j){}
+    void DprintB(TestB b);//不可再此处写函数实现
+
+private:
+    int iVal1,iVal2;
+};
+class TestB{
+    friend class TestC;//友元关系的传递
+
+    friend void TestD::DprintB(TestB);//只让成员函数作为友元!!! (仔细看这个地方的实现,看看上面定义的TestD,以及这个函数声明,和实现的位置,尝试不这样做会发生什么)
+
+public:
+    TestB() = default;
+    TestB(double i, double j):dVal1(i),dVal2(j){}
+
+    void getAval(TestA a){
+        cout << a.iVal1 << " " << a.iVal2 << endl;
+    }
+    void printB(){
+        cout << dVal1 << " " << dVal2 << endl;
+    }
+private:
+    double dVal1,dVal2;
+};
+
+class TestC{
+
+public:
+//    void getAval(TestA a){
+//        cout << a.iVal1 << " " << a.iVal2 << endl;//B是A的友元类,C是B的友元类,但是A不是C的友元类,友元关系不可传递
+//    }
+
+};
+
+
+void TestD::DprintB(TestB b){
+    cout << b.dVal1 << " " << b.dVal2 << endl;
+}
+
+
+//  !!! 友元函数的声明的作用仅仅是影响访问权限,它本身并非普通意义上的声明。
+class C1{
+    friend void f(){
+        cout << "c1" << endl;
     }
 
-};
-//声明时未设为内联
-inline Screen& Screen::move(pos r, pos c) {
-    pos row = r * width;
-    cursor = row + c;
-    return *this;
-}
-//无需在定义和声明的地方都说明inline
-char Screen::get(pos r, pos c)const{
-    pos row = r * width;
-    return contents[row + c];
-}
+public:
+    C1() = default;
+    C1(int i):iVal1(i){}
 
-//以下两个函数返回的是对象本身,而不是对象副本;
-inline Screen& Screen::set(char c) {
-    contents[cursor] = c;
-    return *this;
-}
-inline Screen& Screen::set(pos r, pos col, char ch) {
-    contents[r*width + col] = ch;
-    return *this;
-}
-
-//!类内初始值，使用{}初始化
-class Window_mgr{
+    void G();
+    void H();
 private:
-    std::vector <Screen> screens{Screen(24,80,' ')};
+    int iVal1;
 };
+//下面的代码会发生错误,error: use of undeclared identifier 'f',f为声明!!!!
+//void C1::G(){
+//    f();
+//}
+void f();
+void C1::H() {
+    f();
+}
+
+//  ! 类的作用域(注意下面一种情况,返回类型是类内定义的)
+class C2{
+public:
+    using typeT = std::string::size_type ;
+    typeT func();
+};
+C2::typeT C2::func(){
+    cout << " xxx " << endl;
+}
+//第二个C2省略也可以,书上说不行???????????????????? 背包
 
 
 
 int main(){
 
 
+//    ! 友元类
     pIndexofTest(1);
+    {
+        TestA a(cin);
+        TestB b(1.2,3.333);
+        b.getAval(a);
+    }
+
+//    !!! 成员函数作为友元(注意此处的实现!!!!!)
+    pIndexofTest(2);
+    {
+        TestB b(1.2222,2.2222);
+        TestD d;
+        d.DprintB(b);
+    }
+
     return 0;
 }
