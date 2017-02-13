@@ -213,12 +213,77 @@ public:
     }
 };
 
+//! 委托构造函数，注意执行顺序
+class C7{
+private:
+    int iVal1,iVal2;
+public:
+//    C7(){
+//        cout << "默认构造函数" << endl;
+//        cout << iVal1 << " " << iVal2 << endl;
+//    }
+    C7(int i,int j):iVal1(i),iVal2(j){
+        cout << "三个参数的构造函数" << endl;
+        cout << iVal1 << " " << iVal2 << endl;
+    }
+
+    //! 委托构造函数
+    C7():C7(33,44){
+        cout << "第零个委托构造函数" << endl;
+        cout << iVal1 << " " << iVal2 << endl;
+    }
+    C7(int i):C7(i,9999) {
+        cout << "第一个委托构造函数" << endl;
+        cout << iVal1 << " " << iVal2 << endl;
+    }
+    C7(std::istream& is):C7(){
+        cout << "第二个委托构造函数" << endl;
+        is >> this->iVal1 >> this->iVal2;
+        cout << iVal1 << " " << iVal2 << endl;
+    }
+
+
+    void print(){
+        cout << "work" << endl;
+    }
+};
+
+
+//!! 默认构造函数
+class C8{
+public:
+    C8(const int ii){}
+};
+class C9{
+public:
+//    C8 c8(9);//错误，下面的写法才正确，为什么呢？
+    C8 c8(int);
+
+//    C8 c8;//对应测试8中的出错代码！
+};
+
+
+//隐式的类类型转换，通过一个实参调用的构造函数，定义了一个从构造函数的参数类型向类类型转换的隐式转换规则
+class C10{
+    std::string str;
+    int j;
+public:
+    C10() = default;
+    C10(string str1):str(str1){}
+    C10(int i,string str1):j(i),str(str1){}
+
+    void addCla(const C10& c){
+       cout << c.j + j << endl << c.str + str << endl;
+    }
+
+};
 int main(){
 
 
 //    ! 友元类
     pIndexofTest(1);
     {
+        cout << "input 2 parameter" << endl;
         TestA a(cin);
         TestB b(1.2,3.333);
         b.getAval(a);
@@ -254,10 +319,46 @@ int main(){
         c5.print();// 0 100,
     }
 
+//    !!! cin接受istream&的参数的构造函数
     pIndexofTest(6);
     {
+        cout << "input 2 parameter" << endl;
         C6 c6(cin);
         cout << c6 << endl;
     }
+
+//    !!! 委托构造函数
+    pIndexofTest(7);
+    {
+        cout << "test1: " << endl;
+        C7 c7;
+        c7.print();
+        cout << "test2: " << endl;
+        C7 c71(1);
+        cout << "test3: " << endl;
+        C7 c72(1,2);
+        cout << "test4: " << endl;
+        cout << "input 2 parameter" << endl;
+        C7 c73(cin);
+
+
+        //!!!!! 注意执行下面的代码，会发生什么？？？？？,c77不是一个对象，那他是什么呢？
+        C7 c77();
+        //p263解释了。c77是个函数，返回值是C7对象
+    }
+
+//    !! 默认构造函数的使用！！
+    pIndexofTest(8);
+    {
+        C9 c9;//会出错，error: no matching function for call to ‘C8::C8()’
+    }
+
+//    !! 隐式的类类型转换
+    pIndexofTest(9);
+    {
+        C10 c10(12,"eeee");
+        c10.addCla(string("hahah"));
+    }
+
     return 0;
 }
