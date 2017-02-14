@@ -263,20 +263,57 @@ public:
 };
 
 
-//隐式的类类型转换，通过一个实参调用的构造函数，定义了一个从构造函数的参数类型向类类型转换的隐式转换规则
+//!!隐式的类类型转换，通过一个实参调用的构造函数，定义了一个从构造函数的参数类型向类类型转换的隐式转换规则
 class C10{
     std::string str;
     int j;
 public:
     C10() = default;
-    C10(string str1):str(str1){}
+//    C10(string str1):str(str1){}
     C10(int i,string str1):j(i),str(str1){}
 
-    void addCla(const C10& c){
-       cout << c.j + j << endl << c.str + str << endl;
+    C10(const string& str1):str(str1){}
+    explicit C10(string& str1):str(str1){}//抑制隐式转换,但是可以显式的调用
+
+//    !!! 思考下面3个函数的区别,如何重载的?
+//    void addClas(C10 c){
+//       cout << c.j + j << endl << c.str + str << endl;
+//    }
+    void addClas(C10& c){
+        cout << c.j + j << endl << c.str + str << endl;
+    }
+    void addClas(const C10& c){
+        cout << c.j + j << endl << c.str + str << endl;
     }
 
 };
+
+//  ! 聚合类(所有成员都是public,没有任何构造函数,没有类内初始值,没有基类)
+struct Data{
+    int iVal;
+    string s;
+};
+
+//  ! 类的静态成员
+class clasStatic{
+public:
+    clasStatic() = default;
+    clasStatic(int i,int j):iVal1(i),iVal2(j){}
+    static void printStatic(){
+        cout << stDVal << endl;
+    }
+    static double inputStatic(){
+        return stDVal;
+    }
+    static void
+
+private:
+    int iVal1,iVal2;
+    static double stDVal;
+};
+
+
+
 int main(){
 
 
@@ -357,7 +394,27 @@ int main(){
     pIndexofTest(9);
     {
         C10 c10(12,"eeee");
-        c10.addCla(string("hahah"));
+//        c10.addClas("hahah");//只允许一步类类型转换,这里转换了2次
+        string s1 = const_cast<string&>(static_cast<const string&>("hhh"));//const_cast<string&>(s)必须是string& 才能隐式转换
+        c10.addClas(s1);
+
+        const string sCnt = "s";
+        c10.addClas(sCnt);
+    }
+
+//    ! 聚合类(初始值列表来初始化)
+    pIndexofTest(10);
+    {
+        Data s = {23,"hh"};
+        cout << s.iVal << endl << s.s << endl;
+    }
+
+//    !!! 字面值常量类????用在哪些地方??如何使用???
+
+//    !! 类的静态成员
+    pIndexofTest(11);
+    {
+
     }
 
     return 0;
