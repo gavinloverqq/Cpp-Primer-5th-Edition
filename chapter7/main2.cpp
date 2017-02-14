@@ -305,13 +305,15 @@ public:
     static double inputStatic(){
         return stDVal;
     }
-    static void
+    static void deliver(double);
 
 private:
     int iVal1,iVal2;
     static double stDVal;
 };
-
+void clasStatic::deliver(double d){
+   stDVal = d;
+}
 
 
 int main(){
@@ -411,10 +413,14 @@ int main(){
 
 //    !!! 字面值常量类????用在哪些地方??如何使用???
 
-//    !! 类的静态成员
+//    !! 类的静态成员 (关于静态成员的试验均失败，有待后来重新写)
     pIndexofTest(11);
     {
-
+        clasStatic cs(3,4);
+//        clasStatic::stDVal = 10.222;
+        cs.printStatic();
+        clasStatic::deliver(10.234);
+//        clasStatic::printStatic();
     }
 
     return 0;
