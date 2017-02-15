@@ -167,15 +167,23 @@ int main() {
     pIndexofTest(8);
     {
         string tmp = "hello 123 3.1234";
-        istringstream strCin(tmp);
+        istringstream strCin;
         string str1;
         int i;
         double d;
+        strCin.str(tmp);
         strCin >> str1;
         strCin >> i >> d;
         cout << str1 << " " << i << " " << d << endl;
 
-
+        string str2;
+        ostringstream strCout;
+        int iVal = 54;
+        double dVal = 234.2324;
+        bool b = true;
+        strCout << iVal << " " << dVal << " " << b << endl;
+        str2 = strCout.str();
+        cout << str2;
     }
 
     return 0;
