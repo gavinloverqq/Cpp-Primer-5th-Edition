@@ -1,6 +1,10 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <assert.h>
+#include <sstream>
+#include <vector>
+
 
 using namespace std;
 //使用 ! 表示重要程度,! 越多越重要
@@ -100,16 +104,78 @@ int main() {
 
     pIndexofTest(5);
     {
-        fstream fis;
-        fis.open("data.in");
+        fstream fis("/home/kunwan/Cpp-Primer-5th-Edition/chapter8/data.in");
         ofstream fos;
-        fos.open("data.out");
+        fos.open("/home/kunwan/Cpp-Primer-5th-Edition/chapter8/data.out");
 
         int tmp;
-        if(fis >> tmp){
-            cout << tmp;
-        } else
-            cerr << "no data" << endl;
+        while (fis >> tmp){
+            fos << tmp;
+        }
+    }
+
+    pIndexofTest(6);
+    {
+        string path = "/home/kunwan/Cpp-Primer-5th-Edition/chapter8/";
+        fstream fis;
+        fis.open(path + "data.in");
+        ofstream fos;
+        fos.open(path + "/data.out");
+
+        int tmp;
+        while (fis >> tmp){
+            fos << tmp << " ";
+        }
+        fis.close();
+        fis.open(path + "data2.in");
+        assert(fis);
+//        fos.flush();
+        fos << " mmmmmmm ";
+        while (fis >> tmp){
+            fos << tmp << " ";
+        }
+        fis.close();
+        fos.close();
+    }
+
+//    !! 文件读写
+    pIndexofTest(7);
+    {
+        string path = "/home/kunwan/Cpp-Primer-5th-Edition/chapter8/";
+        fstream fis;
+        fis.open(path + "data.in");
+        ofstream fos0(path + "data0.out");
+        ofstream fos1(path + "data1.out",ofstream::out);
+        ofstream fos2(path + "data2.out",ofstream::out | ofstream::trunc);
+
+//        保留文件中已有数据的唯一方法时显式的制定app或为in模式，默认为输出以及截断（trunc）
+        ofstream fos3(path + "data3.out",ofstream::app);
+        ofstream fos4(path + "data4.out",ofstream::out | ofstream::app);
+        ofstream fos5(path + "data5.out",ofstream::out | ofstream::ate);
+
+        fos0 << "     HHHout0";//重新开始
+        fos1 << "     HHHout1";//重新开始
+        fos2 << "     HHHout2";//重新开始
+        fos3 << "     HHHout3";//后面追加
+        fos4 << "     HHHout4";//后面追加
+        fos5 << "     HHHout5";//重新开始
+
+        fis.close();
+    }
+
+//    stringstream string流，从string中读取或者读如数据
+    pIndexofTest(8);
+    {
+        string tmp = "hello 123 3.1234";
+        istringstream strCin(tmp);
+        string str1;
+        int i;
+        double d;
+        strCin >> str1;
+        strCin >> i >> d;
+        cout << str1 << " " << i << " " << d << endl;
+
+
     }
 
     return 0;
