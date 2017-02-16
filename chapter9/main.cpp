@@ -145,7 +145,7 @@ int main() {
     {
         vector <int> iVec = {1,2,3,4,5,6,7};
         list <int> iLst = {8,8,8,8,8,8,8,8,8};
-        list<int>::iterator pLst = iLst.begin();
+        list <int>::iterator pLst = iLst.begin();
         cout << *pLst << endl;//1
         iLst.assign(iVec.begin() + 2,iVec.end());//两个迭代器
         for(auto a : iLst)
@@ -158,7 +158,7 @@ int main() {
     pIndexofTest(6);
     {
         vector <int> iVec1(10,234);
-        vector<int>::iterator pVec = iVec1.begin();
+        vector <int>::iterator pVec = iVec1.begin();
         cout << *pVec << endl;
         vector <int> iVec2(3,1);
         swap(iVec1,iVec2);//除array外,swap不对任何元素进行拷贝,删除或插入操作。都是常数时间完成
@@ -193,16 +193,16 @@ int main() {
 //    ! 6种初始化方式
     pIndexofTest(7);
     {
-        vector<int> iVec1;
-        vector<int> iVec2(iVec1);
-        vector<int> iVec3(10,1);
-        vector<int> iVec4(3);
+        vector <int> iVec1;
+        vector <int> iVec2(iVec1);
+        vector <int> iVec3(10,1);
+        vector <int> iVec4(3);
 
-        vector<int> iVec5{1,2,3};
-        vector<int> iVec6 = {1,2,3};
+        vector <int> iVec5{1,2,3};
+        vector <int> iVec6 = {1,2,3};
         cout << (iVec5 == iVec6) << endl;
-        vector<int> iVec7(3);
-        vector<int> iVec8(iVec2.begin(),iVec2.end());
+        vector <int> iVec7(3);
+        vector <int> iVec8(iVec2.begin(),iVec2.end());
 
     };
 
@@ -213,7 +213,7 @@ int main() {
         print(fwLst);
         fwLst.push_front(33);
 //        fwLst.push_back() forward_list 和 array 不支持push_back
-        deque<int> iDq{1,2,3,4,5,6,7};
+        deque <int> iDq{1,2,3,4,5,6,7};
         print(iDq);
 
         iDq.push_back(23);
@@ -230,7 +230,7 @@ int main() {
         iDq.insert(pDq,3,-1);
         print(iDq);
 
-        vector<int> iVec{0,0,0};
+        vector <int> iVec{0,0,0};
         iDq.insert(iDq.end(),iVec.begin(),iVec.end());
         print(iDq);
 
@@ -261,7 +261,7 @@ int main() {
 //    emplace 用法，emplace调用元素的构造器，直接在容器内存中创建对象，push_back会创建一个临时对象，然后拷贝到容器中
     pIndexofTest(10);
     {
-        vector<Test> tVec(3);
+        vector <Test> tVec(3);
         cout << "  " << endl;
         tVec.push_back(Test(1,2,"hh"));
         tVec.emplace_back(4,4,"nnnn");
@@ -271,6 +271,115 @@ int main() {
 
     }
 
+//    !! 练习9.22
+    pIndexofTest(11);
+    {
+        vector <int> iVec{1,2,3,4,5};
+        vector <int>::iterator pVec = iVec.begin(),
+            pMid = iVec.begin() + iVec.size() / 2;
+        int value = 2,num = 0,len = iVec.size();
+        while (pVec != pMid){
+            if(*pVec == value){
+                pVec = iVec.insert(pVec,2 * value);
+                num++;
+                pMid = iVec.begin() + len / 2 + num;
+                pVec++;
+                pVec++;
+            } else
+                pVec++;
+        }
+        print(iVec);
+    }
+
+//    !! 顺序容器的访问
+    pIndexofTest(12);
+    {
+        forward_list <int> fwLst{1,2,3,4,5};
+        if(!fwLst.empty()) {//对空容器调用front和back操作就像使用越界的数组下标一样，是一种严重的错误
+            auto val1 = *fwLst.begin(), val2 = fwLst.front();
+            auto last = fwLst.end();
+//            auto val3 = *(--last);//forward_list不支持--
+//            auto val4 = fwLst.back();//forward_list不支持back操作//以上两种操作其他顺序容器都支持
+        }
+        deque <int> iDq{1,2,3,4,5};
+        cout << iDq[1] << "  " << endl;
+        iDq.push_back(22);
+        cout << iDq[1] << "  " << endl;
+        iDq.push_front(555);
+        cout << iDq[1] << "  " << endl;
+    }
+
+//    !! 访问成员函数（front back 下标 at）返回的是引用
+    pIndexofTest(13);
+    {
+        list <int> iLst{1,2,3,4,5};
+        iLst.front() = 999;
+        auto& v1 = iLst.back();//返回引用
+        auto v2 = iLst.back();//返回一个拷贝
+        v2 = -2;
+        print(iLst);
+        v1 = -100;
+        print(iLst);
+    }
+
+//    !! at 与 下标 的区别
+    pIndexofTest(14);
+    {
+        vector <int> iVec;
+//        cout << iVec[0];//运行时错误
+//        cout << iVec.at(0);//抛出out_of_range异常
+    }
+
+//    !! 元素删除（deuque 除首尾之外的任何元素删除会使所有迭代器，引用，指针失效；vector string 删除点之后的迭代器，引用，指针失效
+//    ???? 如何验证迭代器失效，迭代器失效指的是什么？？？？
+    pIndexofTest(15);
+    {
+        vector <int> iVec{1,2,3,4,5,6,7,8,9};
+        print(iVec);
+        iVec.pop_back();
+        print(iVec);
+//        iVec.pop_front();
+        auto p = iVec.erase(iVec.begin());//删除p，返回p之后的元素
+        cout << *p << endl;
+        print(iVec);
+
+        auto p1 = iVec.erase(iVec.begin() + 1,iVec.end() - 2);//删除b e 之间的元素，返回最后一个被删元素之后的迭代器，若最后是尾后迭代器，则还是返回尾后迭代器
+        cout << *p1 << endl;
+        print(iVec);
+
+        auto p2 = iVec.erase(iVec.begin(),iVec.begin());//删除范围相等情况：返回当前迭代器，不删除任何元素
+        cout << *p2 << endl;
+        print(iVec);
+
+        iVec.clear();
+        print(iVec);
+    }
+
+//    ! 练习9.26
+    pIndexofTest(16);
+    {
+        int a[] = {1,2,3,4,5,6,7,8,10,11,13,14};
+        vector <int> iVec(a,a + sizeof(a) / sizeof(int));
+        list <int> iLst(a,a + sizeof(a) / sizeof(int));
+        auto pV = iVec.begin();
+        auto pL = iLst.begin();
+        while (!iVec.empty() && pV != iVec.end()){
+            if(*pV % 2){
+                pV = iVec.erase(pV);
+            } else
+                ++pV;
+        }
+        print(iVec);
+        while (!iLst.empty() && pL != iLst.end()){
+            if(*pL % 2 == 0){
+                pL = iLst.erase(pL);
+            } else
+                ++pL;
+        }
+        print(iLst);
+
+
+    }
     return 0;
 }
 
