@@ -6,6 +6,7 @@
 #include <list>
 #include <forward_list>
 #include <queue>
+#include <sstream>
 
 
 using namespace std;
@@ -23,8 +24,23 @@ void pIndexofTest(int i){
          << endl;
 }
 
+template <typename T>
+void print(T& t){
+    for(auto a : t)
+        cout << a << " ";
+    cout << endl;
+}
 
 
+class Test{
+public:
+    int i,j;
+    string str;
+    Test(){
+        cout << "defualt constructor" << endl;
+    }
+    Test(int ii,int jj,string s):i(ii),j(jj),str(s){}
+};
 int main() {
 
 //    !! 除string vector deque，array 其他容器只支持 ++ -- == != * -> 这几个操作！！！
@@ -174,8 +190,86 @@ int main() {
 
     }
 
+//    ! 6种初始化方式
+    pIndexofTest(7);
+    {
+        vector<int> iVec1;
+        vector<int> iVec2(iVec1);
+        vector<int> iVec3(10,1);
+        vector<int> iVec4(3);
+
+        vector<int> iVec5{1,2,3};
+        vector<int> iVec6 = {1,2,3};
+        cout << (iVec5 == iVec6) << endl;
+        vector<int> iVec7(3);
+        vector<int> iVec8(iVec2.begin(),iVec2.end());
+
+    };
+
+//    !! 插入元素 (vector ,string ,deque 插入元素会使所有指向容器的迭代器，引用失效)
+    pIndexofTest(8);
+    {
+        forward_list <int> fwLst{1,2,3,4,5,6,7};
+        print(fwLst);
+        fwLst.push_front(33);
+//        fwLst.push_back() forward_list 和 array 不支持push_back
+        deque<int> iDq{1,2,3,4,5,6,7};
+        print(iDq);
+
+        iDq.push_back(23);
+        iDq.push_front(666);
+        print(iDq);
+
+//        !! insert的4中用法，第一个参数都是传入迭代器，后续插入是在迭代器前面插入
+        deque<int>::iterator pDq;
+        pDq = iDq.begin();
+        iDq.insert(pDq,8888);
+        print(iDq);
+
+        cout << *pDq << endl;//666
+        iDq.insert(pDq,3,-1);
+        print(iDq);
+
+        vector<int> iVec{0,0,0};
+        iDq.insert(iDq.end(),iVec.begin(),iVec.end());
+        print(iDq);
+
+        iDq.insert(pDq,{999,999,999});
+        print(iDq);
+
+        iDq.insert(pDq+3,1111);
+        cout << *pDq << endl;//666 迭代器失效指的是什么呢？
+
+    }
+
+//    !! insert的返回值,返回插入第一个新元素的迭代器
+    pIndexofTest(9);
+    {
+        stringstream strCin;
+        string data = "1 2 3 4 5 6 7";
+        strCin.str(data);
+        list<int> iLst;
+        auto p = iLst.begin();
+        int tmp;
+        // 理解此循环相当于push_front;
+        while (strCin >> tmp){
+            p = iLst.insert(p,tmp);
+        }
+        print(iLst);
+    }
+
+//    emplace 用法，emplace调用元素的构造器，直接在容器内存中创建对象，push_back会创建一个临时对象，然后拷贝到容器中
+    pIndexofTest(10);
+    {
+        vector<Test> tVec(3);
+        cout << "  " << endl;
+        tVec.push_back(Test(1,2,"hh"));
+        tVec.emplace_back(4,4,"nnnn");
+        cout << "  " << endl;
+        tVec.emplace_back();//使用默认构造函数
 
 
+    }
 
     return 0;
 }
