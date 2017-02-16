@@ -159,6 +159,7 @@ int main() {
     {
         vector <int> iVec1(10,234);
         vector <int>::iterator pVec = iVec1.begin();
+
         cout << *pVec << endl;
         vector <int> iVec2(3,1);
         swap(iVec1,iVec2);//除array外,swap不对任何元素进行拷贝,删除或插入操作。都是常数时间完成
