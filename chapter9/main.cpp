@@ -41,6 +41,30 @@ public:
     }
     Test(int ii,int jj,string s):i(ii),j(jj),str(s){}
 };
+
+
+void func(forward_list <string>& fwLst,string s1,string s2){
+    if(!fwLst.empty()){
+        auto prev = fwLst.before_begin();
+        auto curr = fwLst.begin();
+        while (curr != fwLst.end()){
+            if(*curr == s1){
+                fwLst.insert_after(curr,s2);
+                break;
+            } else{
+                ++curr;
+                ++prev;
+            }
+        }
+        if(curr == fwLst.end())
+            fwLst.insert_after(prev,s2);
+    }
+}
+
+
+
+
+
 int main() {
 
 //    !! 除string vector deque，array 其他容器只支持 ++ -- == != * -> 这几个操作！！！
@@ -379,6 +403,76 @@ int main() {
         }
         print(iLst);
 
+    }
+
+//    ! forward_list由于单向链表的特殊结构,只能找到节点的后继,不能找到节点的前驱,因此在 插入 删除 操作上略有不同
+    pIndexofTest(17);
+    {
+        forward_list <int> fwLst{1,2,3,4,5,6,7,8,9,11,12,14,16};
+        print(fwLst);
+        fwLst.insert_after(++fwLst.begin(),{44,55,66,77});
+        print(fwLst);
+        fwLst.emplace_after(fwLst.begin(),999);
+        print(fwLst);
+        auto prev = fwLst.before_begin();
+        auto curr = fwLst.begin();
+        while (curr != fwLst.end()){
+            if(*curr % 2){
+                curr = fwLst.erase_after(prev);
+            } else{
+                ++curr;
+                ++prev;
+            }
+        }
+        print(fwLst);
+    }
+
+//    !! 练习9.28 ,
+    pIndexofTest(18);
+    {
+        forward_list <string> str1{"aa","bb","cc","dd"},str2{"ee","ff","gg"};
+        string s1 = "cc",s2 = "xxxx";
+        func(str1,s1,s2);
+        func(str2,s1,s2);
+        print(str1);
+        print(str2);
+    }
+
+//    !! resize
+    pIndexofTest(19);
+    {
+        vector <int> iVec(10,42);
+        iVec.resize(15);//前10个42,后5个0
+        iVec.resize(25,-1);//后10个-1,加到末尾
+        print(iVec);
+        iVec.resize(5);//只保留前5个
+        print(iVec);
+    }
+
+//    !!! 容器操作可能使迭代器,指针,引用失效
+    pIndexofTest(20);
+    {
+        vector <int> iVec{1,2,3,4,5,6,7,8,9};
+        auto pVec = iVec.begin();
+        while (pVec != iVec.end()){
+            if(*pVec % 2){
+                pVec = iVec.insert(pVec,*pVec);//迭代器失效
+                pVec += 2;
+            } else
+                pVec = iVec.erase(pVec);//迭代器失效
+        }
+        print(iVec);
+
+        {
+            vector <int> iVec{1,2,3,4,5,6,7,8,9};
+            auto bg = iVec.begin();
+            auto ed = iVec.end();
+            while (bg != ed){
+                bg++;
+                bg = iVec.insert(bg,42);
+                bg++;
+            }
+        }
 
     }
     return 0;
