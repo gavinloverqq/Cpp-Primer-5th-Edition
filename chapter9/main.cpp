@@ -462,19 +462,96 @@ int main() {
                 pVec = iVec.erase(pVec);//迭代器失效
         }
         print(iVec);
+    }
 
-        {
-            vector <int> iVec{1,2,3,4,5,6,7,8,9};
-            auto bg = iVec.begin();
-            auto ed = iVec.end();
-            while (bg != ed){
-                bg++;
-                bg = iVec.insert(bg,42);
-                bg++;
+//    !! 补保存end返回的迭代器
+    pIndexofTest(21);
+    {
+        vector <int> iVec{1,2,3,4,5,6,7,8,9};
+        auto bg = iVec.begin();
+        auto ed = iVec.end();
+//            while(bg != ed)//ed指向的内存数据已经变了
+        while (bg != iVec.end()){
+            bg++;
+            bg = iVec.insert(bg,42);
+            cout << *ed << endl;
+            bg++;
+        }
+    }
+
+//    !! forward_list删除元素要保存前驱和后继
+    pIndexofTest(22);
+    {
+        forward_list <int> fwLSt{1,2,3,4,5,6,7,8,9};
+        auto curr = fwLSt.begin();
+        auto prev = fwLSt.before_begin();
+        while (curr != fwLSt.end()){
+            if(*curr & 1){
+                curr = fwLSt.insert_after(curr,*curr);
+                ++curr;
+                ++prev;
+                ++prev;
+            } else {
+                curr = fwLSt.erase_after(prev);
             }
         }
-
+        print(fwLSt);
     }
+
+//    !! vector和string 是如何增长的
+    pIndexofTest(23);
+    {
+        vector <int> iVec{1,2,3,4};
+        cout << iVec.capacity() << endl;//capacity 不重新分配内存空间的话可以保存多少元素
+        iVec.reserve(100);//reserve 分配至少容纳n个元素的内存空间
+        cout << iVec.capacity() << endl;
+        iVec.reserve(2);//当需求内存大于当前容量时，重新分配更多的内存，当需求内存小于当前容量，reserve 不起任何作用，capacity显示的也是当前容量值
+        cout << iVec.capacity() << endl;
+        iVec.resize(20);//同样resize也不会回收预留内存
+        cout << iVec.capacity() << endl;
+        iVec.resize(120);
+        cout << iVec.capacity() << endl;
+    }
+
+//    !! insert size capacity resize
+    pIndexofTest(24);
+    {
+        vector <int> iVec;
+        cout << iVec.size() << " " << iVec.capacity() << endl;
+        for (int i = 0; i < 20; ++i) {
+           iVec.push_back(i);
+        }
+        cout << iVec.size() << " " << iVec.capacity() << endl;
+        iVec.reserve(50);
+        cout << iVec.size() << " " << iVec.capacity() << endl;
+        while (iVec.size() != iVec.capacity())
+            iVec.push_back(333);
+        cout << iVec.size() << " " << iVec.capacity() << endl;
+        iVec.push_back(4);
+        cout << iVec.size() << " " << iVec.capacity() << endl;
+        iVec.shrink_to_fit();
+        cout << iVec.size() << " " << iVec.capacity() << endl;
+        iVec.insert(iVec.begin(),10);//与书中，描述不符
+        cout << iVec.size() << " " << iVec.capacity() << endl;
+    }
+
+//    ! 练习9.40答案错误
+    pIndexofTest(25);
+    {
+        stringstream strCin;
+        string data{"1 2 3 4 5 65"};
+        strCin.str(data);
+        vector <int> iVec;
+        iVec.reserve(10);
+        int i;
+        while (strCin >> i){
+            iVec.push_back(i);
+        }
+        iVec.resize(iVec.size() + iVec.size() / 2);
+        cout << iVec.size() << " " << iVec.capacity() << endl;
+    }
+
+
     return 0;
 }
 
