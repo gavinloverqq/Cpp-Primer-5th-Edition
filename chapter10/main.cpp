@@ -138,5 +138,43 @@ int main() {
         print(iVec);
     }
 
+//    ! back_insert 接受一个指向容器的引用,返回一个与该容器绑定的插入迭代器
+    pIndexofTest(6);
+    {
+        vector <int> iVec;
+        auto it = back_inserter(iVec);
+        *it = 44;
+        print(iVec);
+
+//        !!! 与书上p341说法不一致
+//        vector <int> iVec2;
+//        fill_n(back_inserter(iVec2),10,0);
+//        print(iVec2);
+    }
+
+//    ! copy 拷贝算法
+    pIndexofTest(7);
+    {
+        int a1[] = {1,2,34,5};
+        int a2[10] = {7,8,9,10,11,12,13,14,15,16};
+        auto a = copy(begin(a1),end(a1),a2);//接受三个参数,前两个迭代器决定范围,最后一个迭代器表示目的序列的起始位置
+        print(a2);
+        cout << *a  << endl;//返回值指向拷贝序列的最后一个字符的位置
+    }
+
+//    ! replace
+    pIndexofTest(8);
+    {
+        list <int> iLst(10,11);
+        iLst.front() = 12;
+        replace(iLst.begin(),iLst.end(),11,0);
+        print(iLst);
+        vector <int> iVec;
+        replace_copy(iLst.begin(),iLst.end(),back_inserter(iVec),12,333);
+//        replace_copy(iLst.begin(),iLst.end(),iVec.begin(),12,333);//同测试6,和书中不一样
+        print(iLst);
+//        print(iVec);
+//        cout << iVec[1] << endl;
+    }
     return 0;
 }
