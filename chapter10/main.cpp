@@ -9,7 +9,7 @@
 #include <sstream>
 #include <algorithm>
 #include <numeric>
-
+#include <cstring>
 
 using namespace std;
 
@@ -127,7 +127,7 @@ int main() {
 
 //    ! fill 操作,fill不检查写操作,,在使用写容器元素的算法时,要保证序列原大小不少于我们要写的元素个数,算法不会执行容器操作,不可能改变容器大小
     pIndexofTest(5);
-    {
+    /*{
         vector <int> iVec{1,2,4};
         print(iVec);
         fill(iVec.begin(),iVec.end(),0);
@@ -136,11 +136,11 @@ int main() {
         print(iVec);
         fill_n(iVec.begin(),iVec.size() + 10,2);
         print(iVec);
-    }
+    }*/
 
 //    ! back_insert 接受一个指向容器的引用,返回一个与该容器绑定的插入迭代器
     pIndexofTest(6);
-    {
+    /*{
         vector <int> iVec;
         auto it = back_inserter(iVec);
         *it = 44;
@@ -150,7 +150,7 @@ int main() {
 //        vector <int> iVec2;
 //        fill_n(back_inserter(iVec2),10,0);
 //        print(iVec2);
-    }
+    }*/
 
 //    ! copy 拷贝算法
     pIndexofTest(7);
@@ -176,5 +176,31 @@ int main() {
 //        print(iVec);
 //        cout << iVec[1] << endl;
     }
+
+
+//    !!! 练习10.7
+    pIndexofTest(9);
+    {
+        vector <int> iVec;
+        iVec.resize(10);//改变容量，改变size
+//        iVec.reserve(10);//改变容量，不改变size
+        fill_n(iVec.begin(),10,2);
+        print(iVec);
+    }
+
+//    !! unique 需要先排序才可使用unique，算法不能执行容器操作，因此要使用erase删除后面重复的元素，unique返回不重复区域的后一个位置，不执行erase的话，后面的元素仍然存在，但是不知道值是什么
+    pIndexofTest(10);
+    {
+        vector <string> sVec{"aa","ee","ff","bb","cc","bb"};
+        sort(sVec.begin(),sVec.end());
+        auto a = unique(sVec.begin(),sVec.end());
+        print(sVec);
+        sVec.erase(a,sVec.end());
+        print(sVec);
+    }
+
+//    !!! 练习10.10算法不改变容器的大小的原因是什么？
+
+
     return 0;
 }
