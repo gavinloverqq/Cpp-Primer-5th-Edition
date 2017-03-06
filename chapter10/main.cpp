@@ -437,6 +437,7 @@ int main() {
         char c = ' ';
         for_each(sVec.begin(),sVec.end(),[&,c](const string& s){os << s << c;});
         print(sVec);
+//        for_each(sVec.begin(),sVec.end(),bind(printString,os,_1,c));//不能拷贝os;
         for_each(sVec.begin(),sVec.end(),bind(printString,ref(os),_1,c));//使用标准库函ref函数返回引用 cref函数返回const 的引用
         print(sVec);
     }
