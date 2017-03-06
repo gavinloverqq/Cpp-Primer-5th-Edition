@@ -10,10 +10,11 @@
 #include <algorithm>
 #include <numeric>
 #include <cstring>
+#include <functional>
 
 using namespace std;
-
-
+//using std::placeholders::_1;//placeholders命名空间在std空间中,这种时单独定义每一个
+using namespace std::placeholders;//这样直接定义了所有的
 //使用 ! 表示重要程度,! 越多越重要
 //便于查看输出结果的分割显示函数
 void pIndexofTest(int i){
@@ -40,6 +41,14 @@ bool isShorter(const string& s1,const string& s2){
 
 bool partitionBylength(const string& s1){
     return s1.length() < 5;
+}
+
+bool checkSize(const string& s,string::size_type sz){
+    return s.size() >= sz;
+}
+
+void printString(ostream& os,const string& s,const char c){
+   os << s << c;
 }
 int main() {
 
@@ -297,13 +306,139 @@ int main() {
         cout << f1() << endl;// 33
     }
 
-//    !! 引用捕获
+//    !! 引用捕获,引用捕获与返回引用：使用引用捕获一个变量必须确保被引用的对象在lambda执行的时候是存在的，lambda捕获的是局部变量。这些变量在函数结束的时候就不存在了，如果lambda可能在函数结束后执行，捕获的引用指向的局部变量已经消失
     pIndexofTest(18);
     {
         int iVal = 22;
         auto f1 = [&iVal]{ return iVal;};
         iVal = 1;
         cout << f1() << endl;// 1
+
+        ostream& os = cout;
+        char c = ' ';
+        vector <string> sVec{"aaf","eee","ffs","bb","ccdd","bb"};
+        for_each(sVec.begin(),sVec.end(),[&os,c](const string& s){os << s << c;});// ostream必须使用引用捕获
+    }
+
+//    !! 隐式捕获，注意混合捕获时显式捕获的方式必须与隐式捕获的方式不同前面使用了&，后面必须使用值捕获，前面使用了=，后面必须使用引用捕获；隐式捕获必须写在最前面
+    pIndexofTest(19);
+    {
+        int sz = 3;
+        vector <int> iVec{2,3,1,5,4,8,11};
+        sort(iVec.begin(),iVec.end());
+        auto p = find_if(iVec.begin(),iVec.end(),[=](int i){ return i > sz;});// = 表示值捕获
+        for (;p != iVec.end();++p) {
+            cout << *p << " ";
+        }
+        cout << endl;
+
+        ostream& os = cout;
+        int add = 100;
+        for_each(iVec.begin(),iVec.end(),[&,add](int a){os << a + add << " ";});// & 表示引用捕获
+    }
+
+//    !! 可变lambda 值拷贝的变量,lambda不会改变其值,如果要改变其值,必须在参数列表首加上mutable关键字
+    pIndexofTest(20);
+    {
+        int i = 42;
+//        auto f = [i](){ int k = 5;return k+i;};// 正确;
+//        auto f = [i](){ return ++i;};//error: increment of read-only variable ‘i’
+        auto f = [i]()mutable { return ++i;};//mutable关键字
+//        auto f = [&i](){ return ++i;};//mutable关键字
+        cout << i << endl;
+        i = 10;
+        auto j = f();
+        cout << j << endl;//如果是引用此处应该输出11
+
+        int s = 5;
+        auto f2 = [&s](){ return ++s;};//可通过引用改变
+        cout << s << endl;//5
+        cout << f2() << endl;//6
+        s = 10;
+        cout << f2() << endl;//11
+    }
+
+//    !! 指定lambda的返回类型,当我们要为lambda定义返回类型时,必须使用尾至返回类型
+    pIndexofTest(21);
+    {
+        vector <int> iVec{1,2,3,4,-1,-2,-4};
+//        transform(iVec.begin(),iVec.end(),iVec.begin(),[](int i){ return i < 0 ? -i : i;});//返回值是个表达式,因此能推断出返回值类型
+
+        transform(iVec.begin(),iVec.end(),iVec.begin(),[](int i){
+            if(i < 0)
+                return -i;
+            else
+                return i;
+        });//按书本所说此处应该发生错误,不能推断出lambda的返回类型,但是编译可以通过
+        print(iVec);
+
+        //当我们要为lambda定义返回类型时,必须使用尾至返回类型
+        transform(iVec.begin(),iVec.end(),iVec.begin(),[] (int i) -> int {
+            if(i < 0)
+                return -i;
+            else
+                return i;
+        });
+    }
+
+//    ! 练习10.20
+    pIndexofTest(22);
+    {
+        int sz = 3;
+        vector <int> iVec{2,3,1,5,4,8,11};
+        long long ret = count_if(iVec.begin(),iVec.end(),[=](const int a){return a > sz;});
+        cout << ret << endl;
+    }
+
+//    ! 练习10.21
+    pIndexofTest(23);
+    {
+        int i = 10;
+        auto f = [&]() -> bool {
+            while (i > 0)
+                --i;
+            return i == 0;
+        };
+        cout << f() << endl;
+        cout << "i = " << i << endl;
+    }
+
+//    !!! 标准库bind函数
+    pIndexofTest(24);
+    {
+        int sz = 4;
+        vector <string> sVec{"aaf","eee","ffs","bb","ccdd","bb"};
+        auto p = find_if(sVec.begin(),sVec.end(),[sz](const string& s){ return s.size() >= sz;});
+        cout << *(p) << endl;
+
+        auto check4 = bind(checkSize,_1,4);
+        string s = "123545";
+        bool b1 =  check4(s);
+        auto p2 = find_if(sVec.begin(),sVec.end(),bind(checkSize, _1, sz));//
+//        auto p2 = find_if(sVec.begin(),sVec.end(),bind(checkSize, std::placeholders::_1, sz));
+        cout << *p2 << endl;
+    }
+
+//    !! bind重排参数顺序
+    pIndexofTest(25);
+    {
+        vector <string> sVec{"aaf","eee","ffs","bb","ccdd","bb"};
+        sort(sVec.begin(),sVec.end(),isShorter);
+        print(sVec);
+        sort(sVec.begin(),sVec.end(),bind(isShorter,_2,_1));//重排参数顺序
+        print(sVec);
+    }
+
+//    !! 绑定引用参数
+    pIndexofTest(26);
+    {
+        vector <string> sVec{"aaf","eee","ffs","bb","ccdd","bb"};
+        ostream& os = cout;
+        char c = ' ';
+        for_each(sVec.begin(),sVec.end(),[&,c](const string& s){os << s << c;});
+        print(sVec);
+        for_each(sVec.begin(),sVec.end(),bind(printString,ref(os),_1,c));//使用标准库函ref函数返回引用 cref函数返回const 的引用
+        print(sVec);
     }
     return 0;
 }
