@@ -26,7 +26,6 @@ void pIndexofTest(int i){
     << endl;
 }
 
-
 template <typename T>
 void print(T& t){
     for(auto a : t)
@@ -34,6 +33,14 @@ void print(T& t){
     cout << endl;
 }
 
+
+bool isShorter(const string& s1,const string& s2){
+    return s1.length() < s2.length();
+}
+
+bool partitionBylength(const string& s1){
+    return s1.length() < 5;
+}
 int main() {
 
 //  !! find的使用,find使用了 == 操作,在[a,b]区间内查找,返回位置
@@ -201,6 +208,102 @@ int main() {
 
 //    !!! 练习10.10算法不改变容器的大小的原因是什么？
 
+//    ! 项选法传递函数，（stable_sort是怎么实现的）
+    pIndexofTest(11);
+    {
+        vector <string> sVec{"aaf","eee","ffs","bb","ccdd","bb"};
+        sort(sVec.begin(),sVec.end());
+        auto a = unique(sVec.begin(),sVec.end());
+        print(sVec);
+        sVec.erase(a,sVec.end());
+        print(sVec);
+        stable_sort(sVec.begin(),sVec.end(),isShorter);//stable_sort 稳定排序是怎么实现的？
+        print(sVec);
+    }
 
+//    !!! 练习10.13 partition 算法的使用 ,接收一个谓词，对容器内容进行划分，使得谓词返回true的值会排在容器的前半部分，算法返回一个迭代器，指向最后一个true的元素后面
+    pIndexofTest(12);
+    {
+        vector <string> sVec{"aafxxx","eeeww","ffsqqqq","bb","ccdd","bb"};
+        sort(sVec.begin(),sVec.end());
+        print(sVec);
+        auto p = partition(sVec.begin(),sVec.end(),partitionBylength);
+        print(sVec);
+        for (;p != sVec.end() ; ++p) {
+            cout << *p << " ";
+        }
+        cout << endl;
+
+    }
+
+//    !!! lambda表达式
+    pIndexofTest(13);
+    {
+        auto f = [] { return 42;};
+        cout << f() << endl;
+        auto f1 = [] { cout << 5 << endl;return 42;};//如果lambda的函数体包含任何单一的return语句之外的内容，且未制定返回的类型，则返回void？？？
+        cout << f1() << endl;
+    }
+
+//    !! 向lambda传递参数‘
+    pIndexofTest(14);
+    {
+        vector <string> sVec{"aaf","eee","ffs","bb","ccdd","bb"};
+        sort(sVec.begin(),sVec.end());
+        auto a = unique(sVec.begin(),sVec.end());
+        print(sVec);
+        sVec.erase(a,sVec.end());
+        print(sVec);
+//        stable_sort(sVec.begin(),sVec.end(),[](const string& s1,const string& s2){ return s1.length() < s2.length();});//stable_sort 使用lambda表达式
+        stable_sort(sVec.begin(),sVec.end(),[](const string& s1,const string& s2) -> bool { return s1.length() < s2.length();});//stable_sort 使用lambda表达式
+        print(sVec);
+    }
+
+//    !! 使用捕获参数列表
+    pIndexofTest(15);
+    {
+        vector <string> sVec{"aaf","eee","ffs","bb","ccdd","bb"};
+        sort(sVec.begin(),sVec.end());
+        auto a = unique(sVec.begin(),sVec.end());
+        print(sVec);
+        sVec.erase(a,sVec.end());
+        print(sVec);
+        stable_sort(sVec.begin(),sVec.end(),isShorter);
+        print(sVec);
+        int sz = 3;
+        auto wc = find_if(sVec.begin(),sVec.end(),[sz](const string& s1){ return s1.length() > sz;});// 捕获参数列表
+        auto count = sVec.end() - wc;
+        cout << count << " words length is longer than " << sz << endl;
+    }
+
+//    !! 练习
+    pIndexofTest(16);
+    {
+        auto f1 = [](int a,int b)->int{ return a + b;};
+        cout << f1(3,5) << endl;
+
+        int iVal1 = 2;
+        auto f2 = [iVal1](int a)->int{ return a + iVal1;};
+        cout << f2(2) << endl;
+
+    }
+
+//    !! 值捕获 ，值捕获的前提是变量可以拷贝，与函数参数不同被捕获的变量是在lambda创建时拷贝，而不是在调用时拷贝
+    pIndexofTest(17);
+    {
+        int iVal1 = 33;
+        auto f1 = [iVal1]{ return iVal1;};
+        iVal1 = 0;
+        cout << f1() << endl;// 33
+    }
+
+//    !! 引用捕获
+    pIndexofTest(18);
+    {
+        int iVal = 22;
+        auto f1 = [&iVal]{ return iVal;};
+        iVal = 1;
+        cout << f1() << endl;// 1
+    }
     return 0;
 }
