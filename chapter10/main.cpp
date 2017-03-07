@@ -441,5 +441,20 @@ int main() {
         for_each(sVec.begin(),sVec.end(),bind(printString,ref(os),_1,c));//使用标准库函ref函数返回引用 cref函数返回const 的引用
         print(sVec);
     }
+
+//    !! 插入迭代器
+    pIndexofTest(27);
+    {
+        list <int> lst{1,2,3,4};
+        list <int> lst2,lst3;
+        copy(lst.begin(),lst.end(),front_inserter(lst2));// 调用了push_front
+        print(lst2);
+        copy(lst.begin(),lst.end(),inserter(lst3,lst3.begin()));//inserter 在 指定位置之前插入
+        print(lst3);
+    }
+
+
+
+
     return 0;
 }
