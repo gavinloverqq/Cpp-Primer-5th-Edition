@@ -104,6 +104,78 @@ public:
 };
 
 
+int* func1(int a){
+    return new int(a + 5);
+};
+void func2(int a){
+    int* pi = func1(a);
+    return;
+}//pi离开作用域后所指向的内存没有被释放 发生内存泄露
+void func3(int a) {
+    int *pi = func1(a);
+    delete pi;//修复上述错误，或者把指针返回，以后在delete
+    return;
+}
+
+
+// !!! 练习12.6 (值得一做）
+vector <int>* exFunc1(){
+    return new (nothrow) vector <int>;
+}
+void exFunc2(istream& is, vector <int>* pVec){
+    int t;
+    cout << " input 999 to quit" << endl;
+    while (is >> t){
+        if(t == 999)
+            break;
+        pVec->push_back(t);
+    }
+}
+void exFunc3(vector <int>* pVec){
+//    while (!pVec->empty()){
+//        cout << pVec->back() << endl;
+//        pVec->pop_back();//vecor 没有pop_front？？？
+//    }
+    for(auto a : *pVec)
+        cout << a << " ";
+    cout << endl;
+    delete pVec;
+}
+
+shared_ptr<vector<int>> exSmartPoint(){
+    return make_shared <vector<int>>();
+}
+void exSmartPoint2(istream& is,shared_ptr<vector<int>> sPvec){
+    int t;
+    cout << " input 999 to quit" << endl;
+    while (is >> t){
+        if(t == 999)
+            break;
+        sPvec->push_back(t);
+    }
+}
+void exSmartPoint3(shared_ptr<vector<int>> sPvec){
+    for(auto a : *sPvec)
+        cout << a << " ";
+    cout << endl;
+}
+
+
+void process(shared_ptr<int> ptr){
+
+}
+
+
+//接收指针参数的智能指针构造函数是explicit的，因此不能将一个内置指针隐式转换为一个智能指针 必须使用直接初始化形式
+shared_ptr<int> clone(int p){
+//    return new int(p);//错误，此处会发生隐士转换为shared_ptr<int>
+}
+shared_ptr<int> clone2(int p){
+    return shared_ptr<int> (new int (p));//正确，显式创建shared_ptr<int>
+}
+
+
+
 int main() {
 
 //    shared_ptr 智能指针
@@ -225,10 +297,62 @@ int main() {
         delete pd;
 //        delete pd2;//delete 已经释放的内存 未定义行为 Process finished with exit code 134 (interrupted by signal 6: SIGABRT)
 
+//        虽然const对象的值不能被改变，但他本身是可以被销毁的
+        const int* cntPi = new const int(11);
+        delete cntPi;
     }
 
+//    ! 空悬指针，delete后，指针仍然保留这动态内存的地址
+    pIndexofTest(8);
+    {
+        int* p(new int(42));
+        auto q = p;
+        delete p;//p,q都变成空悬指针
+        p = nullptr;//重置指针，但是q还是指向那段地址
+    }
+
+//    !!! 练习12.6
+    pIndexofTest(9);
+    {
+//        vector <int>* pVec = exFunc1();
+//        exFunc2(cin,pVec);
+//        exFunc3(pVec);
+//        pVec = nullptr;//空悬指针
+    }
+
+//    练习 12.7
+    pIndexofTest(10);
+    {
+//        shared_ptr<vector<int>> sPvec = exSmartPoint();
+        auto sPvec = exSmartPoint();
+        exSmartPoint2(cin,sPvec);
+        exSmartPoint3(sPvec);
+    }
+
+//    shared_ptr 和 new 结合使用
+    pIndexofTest(11);
+    {
+        shared_ptr<int> p2(new int(42));
+//        shared_ptr<int> p3 = new int(42);//接收指针参数的智能指针构造函数是explicit的，因此不能将一个内置指针隐式转换为一个智能指针 必须使用直接初始化形式 error: conversion from ‘int*’ to non-scalar type ‘std::shared_ptr<int>’ requested
+
+
+    }
+
+//    !!! 不要混用普通指针和智能指针 使用一个内置指针来访问一个智能指针所负责的所负责的对象是很危险的，因为我们无法知道对象和是会被销毁
+    pIndexofTest(12);
+    {
+        shared_ptr <int> p(new int(42));//p的引用计数为1，
+        process(p);//拷贝p，增加引用计数
+        int i = *p;
+        cout << i << endl;
+
+        int* x(new int(33));//x是普通指针
+//        process(x);//不能将普通指针隐士转化为智能指针 error: could not convert ‘x’ from ‘int*’ to ‘std::shared_ptr<int>’
+        process(shared_ptr<int>(x));//合法的，内存会被释放
+        int j = *x;//为定义的，x是一个空悬指针。虽然输出了0
+        cout << j << endl;
+    }
     return 0;
 }
-
 
 
