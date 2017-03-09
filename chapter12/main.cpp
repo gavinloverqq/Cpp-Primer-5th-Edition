@@ -4,9 +4,7 @@
 #include <string>
 #include <exception>
 #include <new>
-
-
-
+#include <sstream>
 
 using namespace std;
 //使用 ! 表示重要程度,! 越多越重要
@@ -323,9 +321,12 @@ int main() {
 //    练习 12.7
     pIndexofTest(10);
     {
+        stringstream strCin;
+        string sIn{"1 2 3 999"};
+        strCin.str(sIn);
 //        shared_ptr<vector<int>> sPvec = exSmartPoint();
         auto sPvec = exSmartPoint();
-        exSmartPoint2(cin,sPvec);
+        exSmartPoint2(strCin,sPvec);
         exSmartPoint3(sPvec);
     }
 
