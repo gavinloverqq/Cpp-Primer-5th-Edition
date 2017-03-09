@@ -3,6 +3,11 @@
 #include <vector>
 #include <string>
 #include <exception>
+#include <new>
+
+
+
+
 using namespace std;
 //使用 ! 表示重要程度,! 越多越重要
 //便于查看输出结果的分割显示函数
@@ -176,6 +181,50 @@ int main() {
             cout << b1.back() << endl;
             b1.pop_back();
         }
+    }
+
+//    !!! new
+    pIndexofTest(6);
+    {
+//        值初始化，对于有自己的构造函数的类类型（如string）要求值初始化没有意义的，无论采用什么形式，对象都会通过默认构造函数来初始化
+        int* pi = new int(9);
+        cout << *pi << endl;
+//        默认初始化
+        int* p2 = new int;//*p2 的值未定义
+        int* p3 = new int();//值初始化 *p3 的值为 0;
+
+        string* pstr = new string(10,'x');
+        cout << *pstr << endl;
+
+        vector <int> *pVec = new vector<int> {1,2,3,4};
+        print(*pVec);
+
+//        只有单一初始化器才能使用auto
+        auto pa = new auto(5);
+        auto pa2 = new auto({1,2,3});
+        auto pa3 = new auto{1,2,3};//此处与书中描述不一致
+
+//        动态分配的const对象,动态分配的对象必须进行初始化
+        const int* cntPi = new const int(44);
+//        定义了默认构造函数的类类型，可以隐式初始化,否则必须显式初始化
+        const string* cntPstr = new const string;
+
+//        内存耗尽，new会抛出一个异常bad_alloc;
+        int* p4 = new int;//分配失败，抛出异常
+        int* p5 = new (nothrow) int;//分配失败，返回一个空指针 ，这种形式为定位new
+    }
+
+//    !!! delete
+    pIndexofTest(7);
+    {
+        int i, *pi1 = &i, *pi2 = nullptr;
+        double *pd = new double(3.14), *pd2 = pd;
+//        delete i;//错误：error: type ‘int’ argument given to ‘delete’, expected pointer
+//        delete pi1;//delete不是new分配的内存，未定义行为 Process finished with exit code 139 (interrupted by signal 11: SIGSEGV)
+        delete pi2;//释放空指针没有错误
+        delete pd;
+//        delete pd2;//delete 已经释放的内存 未定义行为 Process finished with exit code 134 (interrupted by signal 6: SIGABRT)
+
     }
 
     return 0;
