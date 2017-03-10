@@ -6,3 +6,5 @@
 6.auto pa3 = new auto{1,2,3};//此处与书中描述不一致 p408
 7.delete不是new分配的指针 报错：Process finished with exit code 139 (interrupted by signal 11: SIGSEGV)
 8.delete释放了两次的指针 报错：Process finished with exit code 134 (interrupted by signal 6: SIGABRT)
+9.test13的指针似乎并没有释放
+10. process(new int());// 练习12.12(b) 答案错误 error: could not convert ‘(operator new(4ul), (<statement>, ((int*)<anonymous>)))’ from ‘int*’ to ‘std::shared_ptr<int>’

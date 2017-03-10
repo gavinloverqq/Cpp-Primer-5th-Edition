@@ -172,8 +172,41 @@ shared_ptr<int> clone2(int p){
     return shared_ptr<int> (new int (p));//正确，显式创建shared_ptr<int>
 }
 
+// 练习12.14
+struct destination{};
+struct connection{};
+connection connect(destination* pd){
+    cout << "打开连接" << endl;
+    return connection();
+}
+void disconnect(connection c){
+    cout << " 关闭连接 " << endl;
+}
+//未使用shared_ptr
+void f(destination& d){
+    cout << " 直接管理连接 " << endl;
+    connection c = connect(&d);
+//    忘记调用disconnect;或者异常退出,无法关闭c
+}
+void endConnection(connection* p){
+    disconnect(*p);
+}
+//使用shared_ptr
+void f1(destination& d){
+    cout << "shared_ptr管理连接" << endl;
+    connection c = connect(&d);
+    shared_ptr<connection> p(&c,endConnection);
+    //忘记调用disconnect,或异常退出,connection 会正确关闭
+    cout << endl;
+}
+void f2(destination& d){
+    cout << "shared_ptr管理连接 并使用lambda函数" << endl;
+    connection c = connect(&d);
+    shared_ptr<connection> p(&c,endConnection);
+    //忘记调用disconnect,或异常退出,connection 会正确关闭
+    cout << endl;
 
-
+}
 int main() {
 
 //    shared_ptr 智能指针
@@ -347,11 +380,55 @@ int main() {
         int i = *p;
         cout << i << endl;
 
+//        process(new int());// 练习12.12(b) 答案错误 error: could not convert ‘(operator new(4ul), (<statement>, ((int*)<anonymous>)))’ from ‘int*’ to ‘std::shared_ptr<int>’
+
         int* x(new int(33));//x是普通指针
 //        process(x);//不能将普通指针隐士转化为智能指针 error: could not convert ‘x’ from ‘int*’ to ‘std::shared_ptr<int>’
         process(shared_ptr<int>(x));//合法的，内存会被释放
         int j = *x;//为定义的，x是一个空悬指针。虽然输出了0
         cout << j << endl;
+    }
+
+//    !!! get用来将指针的访问权限传递给代码，你只有确定代码不会delete指针的情况下，才能使用get。永远不要用get初始化另一个智能指针或为林一个指针赋值
+    pIndexofTest(13);
+    {
+        shared_ptr<int> p(new int(42));//引用计数为1
+        int* q = p.get();//正确：但使用q时要注意，不要让它管理的指针被释放
+        {//新陈序块
+            shared_ptr<int> (q);//未定义，两个独立的shared_ptr指向相同的内存
+        }//程序块结束，q被销毁，他指向的内存被释放
+        int foo = *p;//未定义，p指向的内存已经被释放了
+        cout << foo << endl;//似乎并没有被释放？？？？？？？？
+    }
+
+//    ! reset unique 操作
+    pIndexofTest(14);
+    {
+        shared_ptr <int> (p);
+//        p = new int(1024);//错误，不能将一个指针赋值给shared_ptr error: no match for ‘operator=’ (operand types are ‘std::shared_ptr<int>’ and ‘int*’)
+        p.reset(new int (33));
+
+        if(!p.unique())//p 不是当前唯一用户，分配新的拷贝
+            p.reset(new int(*p));
+        *p += 5;//p是唯一用户，可以改变对象的值
+    }
+
+//    !!! 练习12.10 12.11 （好题）
+    pIndexofTest(15);
+    {
+        shared_ptr<int> p(new int(33));
+        process(shared_ptr<int> (p));//拷贝引起 引用计数增加，执行结束后p的引用计数仍然是1
+
+        process(shared_ptr<int> (p.get()));//p.get返回普通指针，用来初始化一个智能指针，结束后智能指针被释放，p变成空悬指针
+    }
+
+//    !! 练习12.14
+    pIndexofTest(16);
+    {
+        destination d;
+        f(d);
+        f1(d);
+        f2(d);
     }
     return 0;
 }
