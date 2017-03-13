@@ -4,6 +4,7 @@
 #include <string>
 #include <exception>
 #include <new>
+#include <fstream>
 #include <sstream>
 
 using namespace std;
@@ -42,6 +43,9 @@ class StrBlobPtr;
 class StrBlob{
     friend class StrBlobPtr;
 
+public:
+    StrBlobPtr begin();
+    StrBlobPtr end();
 
 
 public:
@@ -232,17 +236,22 @@ void f3(destination& d){
 
 using vStr = std::vector<std::string>;
 class StrBlobPtr{
-
+//    friend bool eq(const StrBlobPtr& sbp1,const StrBlobPtr& sbp2);
+    friend bool eq(StrBlobPtr& sbp1,StrBlobPtr& sbp2);
+//    friend bool eq(StrBlobPtr sbp1,StrBlobPtr sbp2);
 public:
     StrBlobPtr():curr(0){}
     StrBlobPtr(StrBlob& a,size_t sz = 0):wptr(a.data),curr(sz){}
     std::string& deref()const;
-    StrBlobPtr& incr();
+    StrBlobPtr& incr();//前缀递增
+
 
 private:
+//    若检查成功，check返回一个指向vector的shared_ptr
     std::shared_ptr<vStr> check(std::size_t,const std::string&)const;
+//    保存一个weak_ptr，意味着底层vector可能被销毁
     std::weak_ptr<vStr> wptr;
-    std::size_t curr;
+    std::size_t curr;//在数组中的当前位置
 };
 std::shared_ptr<vStr> StrBlobPtr::check(std::size_t i, const std::string& msg) const {
     auto ret = wptr.lock();
@@ -252,16 +261,32 @@ std::shared_ptr<vStr> StrBlobPtr::check(std::size_t i, const std::string& msg) c
         throw std::out_of_range(msg);
     return ret;
 }
+//解引用
 std::string& StrBlobPtr::deref() const {
     auto p = check(curr,"dereference past end");
     return (*p)[curr];
 }
+//前缀递增
 StrBlobPtr& StrBlobPtr::incr() {
     check(curr,"increment past end of StrBlobPtr");
     ++curr;
     return *this;
 }
-
+StrBlobPtr StrBlob::begin() { return StrBlobPtr(*this);}
+StrBlobPtr StrBlob::end(){
+    auto ret = StrBlobPtr(*this ,data->size());
+    return ret;
+}
+//bool eq(const StrBlobPtr& sbp1,const StrBlobPtr& sbp2){
+bool eq(StrBlobPtr& sbp1,StrBlobPtr& sbp2){
+//bool eq(StrBlobPtr sbp1,StrBlobPtr sbp2){
+    auto p1 = sbp1.wptr.lock();
+    auto p2 = sbp2.wptr.lock();
+    if(p1 == p2)
+        return (!p1 || sbp1.curr == sbp2.curr);
+    else
+        return false;
+}
 
 int main() {
 
@@ -417,6 +442,7 @@ int main() {
         auto sPvec = exSmartPoint();
         exSmartPoint2(strCin,sPvec);
         exSmartPoint3(sPvec);
+        strCin.clear();
     }
 
 //    shared_ptr 和 new 结合使用
@@ -469,14 +495,14 @@ int main() {
         *p += 5;//p是唯一用户，可以改变对象的值
     }
 
-//    !!! 练习12.10 12.11 （好题）
+//    !!! 练习12.10 12.11 （好题） (这段代码会引起文件操作异常，不知道为什么！
     pIndexofTest(15);
-    {
-        shared_ptr<int> p(new int(33));
-        process(shared_ptr<int> (p));//拷贝引起 引用计数增加，执行结束后p的引用计数仍然是1
-
-        process(shared_ptr<int> (p.get()));//p.get返回普通指针，用来初始化一个智能指针，结束后智能指针被释放，p变成空悬指针
-    }
+//    {
+//        shared_ptr<int> p(new int(33));
+//        process(shared_ptr<int> (p));//拷贝引起 引用计数增加，执行结束后p的引用计数仍然是1
+//
+//        process(shared_ptr<int> (p.get()));//p.get返回普通指针，用来初始化一个智能指针，结束后智能指针被释放，p变成空悬指针
+//    }
 
 //    !! 练习12.14
     pIndexofTest(16);
@@ -542,6 +568,31 @@ int main() {
         }
 
     }
+
+    pIndexofTest(21);
+    {
+        string path = "/home/kunwan/Cpp-Primer-5th-Edition/chapter12/";
+        fstream fis;
+        fis.open(path + "data.in");
+
+        string tmp;
+        StrBlob sb;
+        while (fis >> tmp){
+            cout << tmp << " ";
+            sb.push_back(tmp);
+        }
+//        StrBlobPtr sbp(sb);
+        for (auto bg= sb.begin();!eq(bg,sb.end()); bg.incr()) {
+            cout << bg.deref() << endl;
+        }
+        fis.close();
+    }
+
+
+
+
+
+
     return 0;
 }
 
