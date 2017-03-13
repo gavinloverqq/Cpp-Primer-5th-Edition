@@ -38,7 +38,12 @@ void use_foo(int arg){
 }//p 离开了作用域,他指向的内存会被释放掉,p被销毁,p指向的对象也会被销毁
 
 //共享相同状态的类
+class StrBlobPtr;
 class StrBlob{
+    friend class StrBlobPtr;
+
+
+
 public:
     using sizeType = std::vector <std::string>::size_type;
     StrBlob():data(make_shared<std::vector<std::string>>()){}
@@ -207,6 +212,57 @@ void f2(destination& d){
     cout << endl;
 
 }
+
+//    !! 我们可以拷贝或赋值一个将要被销毁的unique_ptr，如：从函数返回一个unique_ptr
+unique_ptr<int> uclone(int p){
+    return unique_ptr<int> (new int(p));
+}
+unique_ptr<int> uclone2(int p){
+    unique_ptr<int> ret(new int(p));
+    return ret;
+}
+
+
+// 向unique_ptr传递删除器
+void f3(destination& d){
+    connection c = connect(&d);
+    unique_ptr<connection, decltype(endConnection)*> p(&c,endConnection);
+}
+
+
+using vStr = std::vector<std::string>;
+class StrBlobPtr{
+
+public:
+    StrBlobPtr():curr(0){}
+    StrBlobPtr(StrBlob& a,size_t sz = 0):wptr(a.data),curr(sz){}
+    std::string& deref()const;
+    StrBlobPtr& incr();
+
+private:
+    std::shared_ptr<vStr> check(std::size_t,const std::string&)const;
+    std::weak_ptr<vStr> wptr;
+    std::size_t curr;
+};
+std::shared_ptr<vStr> StrBlobPtr::check(std::size_t i, const std::string& msg) const {
+    auto ret = wptr.lock();
+    if(!ret)
+        throw std::runtime_error("unbound StrBlibPtr");
+    if(i >= ret->size())
+        throw std::out_of_range(msg);
+    return ret;
+}
+std::string& StrBlobPtr::deref() const {
+    auto p = check(curr,"dereference past end");
+    return (*p)[curr];
+}
+StrBlobPtr& StrBlobPtr::incr() {
+    check(curr,"increment past end of StrBlobPtr");
+    ++curr;
+    return *this;
+}
+
+
 int main() {
 
 //    shared_ptr 智能指针
@@ -429,6 +485,62 @@ int main() {
         f(d);
         f1(d);
         f2(d);
+    }
+
+//    ! unique_ptr
+    pIndexofTest(17);
+    {
+//        unique_ptr 一切与拷贝有关的操作都不行
+        unique_ptr<double> p1;//可以指向一个double的unique_ptr
+//        unique_ptr<double> p2(p1);//错误：不支持拷贝
+
+//        通过release或reset将指针的所有权从一个（非const）unique_ptr转移给unique
+        unique_ptr<double> p2(p1.release());//release将p1置为空
+        unique_ptr<double> p3(new double(11.111));
+        p2.reset(p3.release());//reset释放了p2原来的内存
+
+//        release会切断unique_ptr和他原来管理的对象进间的练习。release返回的指针通常被用来初始化另一个智能指针或给另一个指针赋值
+
+        p2.release();//错误，p2内存不会释放，而且丢失了指针
+        auto p = p2.release();//正确，必须记得delete（p）
+
+    }
+
+//    !! 我们可以拷贝或赋值一个将要被销毁的unique_ptr，如：从函数返回一个unique_ptr
+    pIndexofTest(18);
+    {/*
+        unique_ptr<int> clone(int p) {
+            return unique_ptr<int>(new int(p));
+        }
+//        也可以返回一个局部对象的拷贝
+        unique_ptr<int> clone2(int p) {
+            unique_ptr<int> ret(new int(p));
+            return ret;
+        }*/
+    }
+
+//    !! 向unique_ptr传递删除器
+    pIndexofTest(19);
+    {
+        /*void f(destination& d){
+            connection c = connect(&d);
+//            加*是需要返回函数指针类型
+            unique_ptr<connection, decltype(endConnection)*>p(&c,endConnection);
+        }*/
+
+    }
+
+//    !! weak_ptr 不增加shared_ptr的引用计数，由于对象可能不存在，我们不能直接使用weak_ptr来直接访问对象，必须调用lock
+    pIndexofTest(20);
+    {
+        auto p = make_shared<int> (42);
+        weak_ptr<int> wp(p);
+
+//        p.reset();注释此行，下面的判断能进去，不注释，不能进去，因为释放了p，weak_ptr悬空
+        if(shared_ptr<int> np = wp.lock()){
+            cout << "wp is locked" << endl;
+        }
+
     }
     return 0;
 }
