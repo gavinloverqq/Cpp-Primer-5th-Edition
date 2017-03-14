@@ -1,20 +1,27 @@
-//
-// Created by kunwan on 3/13/17.
-//
-#include <iostream>
-#include <fstream>
-#include <string>
-using namespace std;
+#include <cstdio>
+#define _ F-->00||-F-OO--;
+int F=0,OO=0;
+void F_OO();
 int main(){
-    string path = "/home/kunwan/Cpp-Primer-5th-Edition/chapter12/";
-    fstream fis;
-    fis.open(path + "data.in");
-    ofstream fos;
-    fos.open(path + "/data.out");
-
-    int tmp;
-    while (fis >> tmp){
-        fos << tmp << " ";
-    }
-    fis.close();
+    F_OO();
+    printf("%1.3f\n",4.*-F/OO/OO);
+}
+void F_OO()
+{
+    _-_-_-_
+    _-_-_-_-_-_-_-_-_
+    _-_-_-_-_-_-_-_-_-_-_-_
+    _-_-_-_-_-_-_-_-_-_-_-_-_-_
+    _-_-_-_-_-_-_-_-_-_-_-_-_-_-_
+    _-_-_-_-_-_-_-_-_-_-_-_-_-_-_
+    _-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_
+    _-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_
+    _-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_
+    _-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_
+    _-_-_-_-_-_-_-_-_-_-_-_-_-_-_
+    _-_-_-_-_-_-_-_-_-_-_-_-_-_-_
+    _-_-_-_-_-_-_-_-_-_-_-_-_-_
+    _-_-_-_-_-_-_-_-_-_-_-_
+    _-_-_-_-_-_-_-_
+    _-_-_-_
 }

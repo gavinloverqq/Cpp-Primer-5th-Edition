@@ -654,8 +654,37 @@ int main() {
         char *pstr = new char[200];
         strcpy(pstr,(str1 + str2).c_str());
         cout << pstr << endl;
+    }
 
+//    allocator类
+    pIndexofTest(26);
+    {
+        allocator <string> alloc;
+        auto const p = alloc.allocate(10);
+        auto q = p;
+//        alloc.construct(q++);//*q为空串；
+        alloc.construct(q++,4,'x');
+//        alloc.construct(q++,"kkk");
+        cout << *p << endl;
+//        cout << *q << endl;//q此时指向未构造的内存
 
+        while (q != p)
+            alloc.destroy(--q);//释放构造的string
+
+        alloc.deallocate(p,10);//释放内存回系统；deallocate指针不能为空，传递的大小参数必须与allocated分配的大小相同
+
+    }
+
+    pIndexofTest(27);
+    {
+        vector<int> iVec{23,44,56,67};
+        allocator<int> alloc;
+        auto p = alloc.allocate(iVec.size()*2);
+        auto q = uninitialized_copy(iVec.begin(),iVec.end(),p);
+        uninitialized_fill_n(q,iVec.size(),333);
+        for (auto i = p; i != q + iVec.size() ; ++i) {
+           cout << *i << " ";
+        }
     }
     return 0;
 }
