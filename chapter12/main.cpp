@@ -6,6 +6,7 @@
 #include <new>
 #include <fstream>
 #include <sstream>
+#include <cstring>
 
 using namespace std;
 //使用 ! 表示重要程度,! 越多越重要
@@ -236,8 +237,8 @@ void f3(destination& d){
 
 using vStr = std::vector<std::string>;
 class StrBlobPtr{
-//    friend bool eq(const StrBlobPtr& sbp1,const StrBlobPtr& sbp2);
-    friend bool eq(StrBlobPtr& sbp1,StrBlobPtr& sbp2);
+    friend bool eq(const StrBlobPtr& sbp1,const StrBlobPtr& sbp2);
+//    friend bool eq(StrBlobPtr& sbp1,StrBlobPtr& sbp2);
 //    friend bool eq(StrBlobPtr sbp1,StrBlobPtr sbp2);
 public:
     StrBlobPtr():curr(0){}
@@ -277,9 +278,9 @@ StrBlobPtr StrBlob::end(){
     auto ret = StrBlobPtr(*this ,data->size());
     return ret;
 }
-//bool eq(const StrBlobPtr& sbp1,const StrBlobPtr& sbp2){
-bool eq(StrBlobPtr& sbp1,StrBlobPtr& sbp2){
-//bool eq(StrBlobPtr sbp1,StrBlobPtr sbp2){
+//注意此处必须使用const引用，因为函数返回值是右值，右值无法绑定到非const上
+bool eq(const StrBlobPtr& sbp1,const StrBlobPtr& sbp2){
+//bool eq(StrBlobPtr& sbp1,StrBlobPtr& sbp2){
     auto p1 = sbp1.wptr.lock();
     auto p2 = sbp2.wptr.lock();
     if(p1 == p2)
@@ -569,6 +570,8 @@ int main() {
 
     }
 
+
+//    !!! 注意右值引用问题
     pIndexofTest(21);
     {
         string path = "/home/kunwan/Cpp-Primer-5th-Edition/chapter12/";
@@ -588,11 +591,72 @@ int main() {
         fis.close();
     }
 
+//    !! new 和数组,动态数组不是数组类型，因此不能使用 begin end
+    pIndexofTest(22);
+    {
+        typedef int arrT[33];
+        int *p = new arrT;
+        for(int i = 0; i < 33; i++){
+            *(p+i) = i + 10;
+        }
+        cout << p[22];
+    }
+
+//    ! 初始化动态数组 释放动态数组
+    pIndexofTest(23);
+    {
+        int *pi1 = new int[10];//10个为初始化的int
+        int *pi2 = new int[10]();//10个初始化为0的int
+        int *pi3 = new int[10]{1,2,3,4,5,6};//10个int分别用列表中对应的初始化器初始化，如果初始化器元素个数大于10，new失败，不会分配任何内存，会抛出一个异常bad_array_new_length
+
+//      动态分配一个空数组是合法的
+        char arr[0];//按书上说此处为错误，不能定义长度为0 的数组
+        char* pch = new char[0];//此处类似于尾后指针，不能对长度为0的动态数组解引用
+
+        delete [] pi1;//delete数组忘记括号对，以及delete单一对象使用了括号对，结果是未定义的;delete动态数组是逆序delete
+    }
+
+//    !!智能指针与动态数组
+    pIndexofTest(24);
+    {
+//        unique_ptr可以管理动态数组，不支持访问成员的运算符（点，箭头）支持下标运算符
+        unique_ptr<int[]> up(new int[10]);
+        for(int i = 0; i < 10; ++i)
+            up[i] = i*2;
+        cout << up[2] << endl;
+
+//        shared_ptr 不能直接管理动态数组，必须自己定义删除器 ,未定义删除器是未定义行为
+        shared_ptr<int> sp(new int[10],[](int* p){delete [] p;});
+//        shared_ptr 不支持下标运算符，不支持指针的算术运算,只能使用get
+        for(int i = 0; i != 10; i++)
+            *(sp.get() + i) = i * 3;
+        cout << *(sp.get() + 2) << endl;
+        sp.reset();
+    }
+
+    pIndexofTest(25);
+    {
+        const char s1[] = "ssssssssssss";
+        const char s2[] = "xxxxxxxxxxxxxxx";
+        char *pch = new char[200];
+        int idx = 0;
+        for(int i = 0; i < sizeof(s1)/sizeof(char); ++i)
+            pch[idx++] = *(s1 + i);
+        idx--;//注意此处！！！！
+        for(int i = 0; i < sizeof(s2)/sizeof(char); ++i)
+            pch[idx++] = *(s2 + i);
+//        strcpy(pch,s1);
+//        strcat(pch,s2);
+        cout << pch << endl;
+
+        string str1 = "gggggggg";
+        string str2 = "hhhhhhhh";
+        char *pstr = new char[200];
+        strcpy(pstr,(str1 + str2).c_str());
+        cout << pstr << endl;
 
 
-
-
-
+    }
     return 0;
 }
 

@@ -9,7 +9,7 @@
 9.test13的指针似乎并没有释放
 10. process(new int());// 练习12.12(b) 答案错误 error: could not convert ‘(operator new(4ul), (<statement>, ((int*)<anonymous>)))’ from ‘int*’ to ‘std::shared_ptr<int>’
 
-
+11.
 ```
     {
         shared_ptr<int> p(new int(33));
@@ -35,3 +35,13 @@
 //        fcout.close();
     
 ```
+
+
+12. 如果eq函数是非const，注意右值绑定到非const引用的错误
+``` error: invalid initialization of non-const reference of type ‘StrBlobPtr&’ from an rvalue of type ‘StrBlobPtr’ ```
+
+参考: 
+> https://www.zhihu.com/question/20759966
+> https://www.kancloud.cn/wizardforcel/cpp-11-faq/106078
+
+13. 练习12.22是个好题
