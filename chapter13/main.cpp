@@ -85,13 +85,13 @@ public:
     HasPtr(const std::string& s = std::string()):ps(new std::string(s)),i(0){}
     HasPtr(const HasPtr& c){
 //        ps = c.ps;
-        ps = new std::string(*c.ps);//拷贝ps指向的对象，而不是拷贝指针本身 ？？？这里不是很懂
+        ps = new std::string(*c.ps);//拷贝ps指向的对象，而不是拷贝指针本身
         i = c.i;
     }
 //    !!! 赋值构造函数这么写为什么出错
     HasPtr& operator = (const HasPtr& hp);
     /*HasPtr& operator = (const HasPtr& hp){
-        ps = new std::string(*hp.ps);//拷贝ps指向的对象，而不是拷贝指针本身 ？？？这里不是很懂
+        ps = new std::string(*hp.ps);//拷贝ps指向的对象，而不是拷贝指针本身
         i = hp.i;
         return *this;
     }*/
@@ -125,6 +125,54 @@ void f2(X& x){}
 
 
 
+//   !!!  需要析构的类也需要拷贝和赋值操作
+class HasPtr2{
+public:
+    HasPtr2(const std::string& s = std::string()):ps(new std::string(s)),i(0){}
+
+    ~HasPtr2(){
+        delete ps;
+    }
+//    !!! 需要拷贝构造函数和一个拷贝赋值运算符
+private:
+    std::string* ps;
+    int i;
+};
+//一个严重的错误
+HasPtr2 f(HasPtr2 hp){
+    HasPtr2 ret = hp;//拷贝给丁的HasPtr2
+    return ret;//ret被销毁，hp被销毁
+}//两个对象被销毁，在两个对象上都要调用HasPtr的析构函数，但是默认的构造函数会让ret和hp指针都指向同一个地址，却被delete两次，显然错误
+
+//13.14练习
+class Numbered{
+public:
+    static int count;
+    Numbered():id(++count){cout << count << " constructor " << endl;}
+    Numbered(const Numbered& n):id(++count){cout << count << " copy " << endl;}
+    Numbered& operator= (const Numbered& n){
+        this->id = ++count;
+        cout << count << " = " << endl;
+        return *this;
+    }
+    int id;
+};
+void fNum(Numbered s){
+    cout << "function1 " << s.id << endl;
+}
+void fNum2(Numbered& s){
+    cout << "funtion2 " << s.id << endl;
+}
+int Numbered::count = 0;
+
+
+// !!! 阻止拷贝，ostream类就无法使用拷贝，赋值
+struct NoCopy{
+    NoCopy() = default;
+    NoCopy(const NoCopy&) = delete;
+    NoCopy&operator = (const NoCopy&) = delete;
+    ~NoCopy() = default;
+};
 
 
 int main() {
@@ -201,5 +249,33 @@ int main() {
 
         cout << " 程序结束 " << endl;
     }
+
+//    !!! 思考下面两种不同写法带来的输出的不同！！！
+    pIndexofTest(6);
+    {
+        Numbered::count = 0;
+        Numbered a,b,c;
+        b = a, c = b;//拷贝与拷贝构造函数的不同！！！
+        fNum(a);
+        fNum(b);
+        fNum(c);
+        fNum2(a);
+        fNum2(b);
+        fNum2(c);
+    }
+
+    pIndexofTest(7);
+    {
+        Numbered::count = 0;
+        Numbered a,b = a, c = a;//b,c不会调用构造函数,不会调用赋值运算，只调用拷贝构造函数
+        fNum(a);//函数传参数，不会去调用构造函数，而是调用拷贝构造函数！！！
+        fNum(b);
+        fNum(c);
+        fNum2(a);
+        fNum2(b);
+        fNum2(c);
+    }
+
+
     return 0;
 }
