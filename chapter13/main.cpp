@@ -269,6 +269,47 @@ private:
 };
 
 
+class HasPtr4{
+    friend void swap(HasPtr4&, HasPtr4&);
+
+public:
+    HasPtr4(const std::string& s = std::string()):ps(new std::string(s)),i(0),use(new std::size_t(1)){}
+    HasPtr4(const HasPtr4& hp):ps(hp.ps),i(hp.i),use(hp.use){++*use;}
+
+//    拷贝并交换的技术!!!异常安全，能正确处理自赋值
+    HasPtr4& operator = (HasPtr4 hp){
+        swap(hp,*this);//hp现在指向本对象曾经使用过的内存
+        return *this;//hp被销毁，从而delete了hp中的指针
+    }
+    ~HasPtr4(){
+        if(--*use == 0){
+            delete ps;
+            delete use;
+        }
+    }
+    string&operator * (){
+        return *ps;
+    }
+    HasPtr4& operator = (const std::string& s){
+        *ps = s;
+        return *this;
+    }
+
+private:
+    std::string *ps;
+    int i;
+    std::size_t *use;
+};
+
+inline
+void swap(HasPtr4& p1, HasPtr4& p2){
+    using std::swap;
+    swap(p1.ps, p2.ps);
+    swap(p1.i, p2.i);
+}
+
+
+
 int main() {
 
 //    !!! 使用insert或push,容器会对元素拷贝初始化,使用emplace会u直接调用构造函数直接初始化
