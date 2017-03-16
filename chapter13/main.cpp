@@ -1,6 +1,6 @@
 #include <iostream>
 #include <vector>
-
+#include <memory>
 using namespace std;
 //使用 ! 表示重要程度,! 越多越重要
 //便于查看输出结果的分割显示函数
@@ -103,13 +103,23 @@ private:
     std::string* ps;
     int i;
 };
-
+//赋值运算符需要注意两点：
+//1.如果将一个对象赋值给他自生，必须能正确工作
+//2.大多数赋值运算符组合了析构函数和拷贝构造函数的工作
 HasPtr& HasPtr::operator = (const HasPtr& hp){
-    auto newps = new std::string(*hp.ps);//拷贝ps指向的对象，而不是拷贝指针本身 ？？？这里不是很懂
-    delete ps;
+    auto newps = new std::string(*hp.ps);//构造函数
+    delete ps;//析构函数的工作
     ps = newps;
     i = hp.i;
     return *this;
+
+
+//    写成这样就无法赋值给自身
+//    delete ps;//析构函数的工作
+//    ps = new std::string(*hp.ps);
+//    i = hp.i;
+//    return *this;
+
 }
 
 
@@ -172,6 +182,90 @@ struct NoCopy{
     NoCopy(const NoCopy&) = delete;
     NoCopy&operator = (const NoCopy&) = delete;
     ~NoCopy() = default;
+};
+
+
+class StrBlob{
+
+public:
+    using sizeType = std::vector <std::string>::size_type;
+    StrBlob():data(make_shared<std::vector<std::string>>()){}
+    StrBlob(std::initializer_list<std::string> il):data(make_shared<std::vector<std::string>>(il)){}
+
+//    练习13.26
+    StrBlob(const StrBlob& sb){
+        data = make_shared <vector<string>>(*sb.data);
+    }
+    StrBlob&operator = (const StrBlob& sb){
+        data = make_shared <vector<string>>(*sb.data);
+        return *this;
+    }
+
+
+    sizeType size()const { return data->size();}
+    bool empty()const{ return data->empty();}
+
+    void push_back(const std::string& s){data->push_back(s);}
+    void pop_back(){
+        check(0,"pop on empty strBlob");
+        data->pop_back();
+    }
+
+    std::string& front(){
+        check(0,"front on empty strBlob");
+        return data->front();
+    }
+    std::string& back(){
+        check(0,"back on empty strBlob");
+        return data->back();
+    }
+
+private:
+    std::shared_ptr <std::vector <std::string> > data;
+    void check(sizeType t,const std::string& msg) const{
+        if(t >= data->size()){
+            throw out_of_range(msg);
+        }
+    }
+
+};
+
+
+//指针类型的Hastr
+class HasPtr3{
+
+public:
+    HasPtr3(const std::string& s = std::string()):ps(new std::string(s)),i(0),use(new std::size_t(1)){}
+    HasPtr3(const HasPtr3& hp):ps(hp.ps),i(hp.i),use(hp.use){++*use;}
+    HasPtr3&operator = (const HasPtr3& hp){
+        ++*hp.use;
+        if(--*use == 0){
+            delete ps;
+            delete use;
+        }
+        ps = hp.ps;
+        i = hp.i;
+        use = hp.use;
+        return *this;
+    }
+    ~HasPtr3(){
+        if(--*use == 0){
+            delete ps;
+            delete use;
+        }
+    }
+    string&operator * (){
+        return *ps;
+    }
+    HasPtr3& operator = (const std::string& s){
+        *ps = s;
+        return *this;
+    }
+
+private:
+    std::string *ps;
+    int i;
+    std::size_t *use;
 };
 
 
@@ -276,6 +370,14 @@ int main() {
         fNum2(c);
     }
 
+    pIndexofTest(8);
+    {
+        HasPtr3 h("hhhh");
+        HasPtr3 h2 = h;
+        h = "xxx1";
+        cout << "h: " << *h << endl;
+        cout << "h2: " << *h2 << endl;
+    }
 
     return 0;
 }
