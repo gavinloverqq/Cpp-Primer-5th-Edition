@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <memory>
+#include "messageAndFolder.h"
 using namespace std;
 //使用 ! 表示重要程度,! 越多越重要
 //便于查看输出结果的分割显示函数
