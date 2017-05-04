@@ -226,7 +226,15 @@ int main() {
         for (auto it = istrMulmap.begin(); it != istrMulmap.end(); ++it) {
             cout << it->first << " " << it->second << endl;
         }
-
     }
+
+//    ! map 下标操作和vector不一样，如果key不存在，使用了下标操作则会创建一个空的value， map 解引用会得到一个pair ，用下标会得到一个mapped_type对象
+    pIndexofTest(13);
+    {
+        map <string, int> word_count{{"aaa", 1}};
+        word_count["sss"];
+    }
+
+
     return 0;
 }
