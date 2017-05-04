@@ -163,6 +163,70 @@ int main() {
 
     }
 
+//    ! traversal map !!! 注意输出顺序是按字典序的升序排列的 （map, set, multimap, multiset, 都是按升序排列的）
+    pIndexofTest(8);
+    {
+        map <string, int> istrmap{{"aaa", 3}, {"bbbb", 4}, {"cc", 2}};
+        map <string, int>::iterator map_it = istrmap.begin();
+        for (;map_it != istrmap.end(); map_it++) {
+            cout << map_it->first << " " << map_it->second << endl;
+        }
+    }
 
+//    !! set insert a element by 2 ways: iterator or 初始化列表
+    pIndexofTest(9);
+    {
+        vector <int> iVec{1, 2, 3, 4, 5};
+        set <int> iSet{1, 2, 3};
+        set <int> iSet2(iVec.begin(), iVec.end());
+        print(iSet);
+        print(iSet2);
+        iSet.insert({55, 66, 77, 1, 3, 5});
+        iSet2.insert(iSet.begin(), iSet.end());
+        print(iSet);
+        print(iSet2);
+    }
+
+//    !! map insert a element by 4 ways: value_type() 、 make_pair() 、 pair 、 初始化列表
+    pIndexofTest(10);
+    {
+        map <string, int> istrmap{{"aaa", 3}, {"bbbb", 4}, {"cc", 2}};
+        istrmap.insert(make_pair("xxxxx", 5));
+        istrmap.insert({"xxx", 3});
+        istrmap.insert(pair <string, int> ("xxxxx", 6));
+        istrmap.insert(map<string, int>::value_type("xxxx", 7));
+    }
+
+//    !! insert 的返回值是一个pair ,pair 的 first 成员是指向元素的迭代器， second 成员是 bool 表示插入是否成功
+    pIndexofTest(11);
+    {
+        map <string, int> istrmap{{"aaa", 3}, {"bbbb", 4}, {"cc", 2}};
+        string word[] = {"aaa", "cc", "cc", "a", "b"};
+        for (int i = 0; i < sizeof(word) / sizeof(word[0]); ++i) {
+            auto ret = istrmap.insert({word[i], 1});
+            if(!ret.second){
+                ++ret.first->second;
+            }
+        }
+        for (auto it = istrmap.begin(); it != istrmap.end(); ++it) {
+            cout << it->first << " " << it->second << endl;
+        }
+    }
+
+//    !! erase ,不重复的返回值为 0， 1； 重复的返回实际值
+    pIndexofTest(12);
+    {
+        map <string, int> istrmap{{"aaa", 3}, {"bbbb", 4}, {"cc", 2}};
+        multimap <string, int> istrMulmap{{"aaa", 3}, {"bbbb", 4}, {"cc", 2}, {"aaa", 4}, {"aaa", 5}};
+        cout << istrmap.erase("aaa") << endl;
+        cout << istrMulmap.erase("aaa") << endl;
+        for (auto it = istrmap.begin(); it != istrmap.end(); ++it) {
+            cout << it->first << " " << it->second << endl;
+        }
+        for (auto it = istrMulmap.begin(); it != istrMulmap.end(); ++it) {
+            cout << it->first << " " << it->second << endl;
+        }
+
+    }
     return 0;
 }
