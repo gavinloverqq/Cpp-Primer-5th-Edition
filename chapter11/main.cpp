@@ -40,6 +40,9 @@ void addChild(map<string, vector<string>> &families, const string& family, const
     families[family].push_back(child);
 }
 
+bool cmp(const int& a, const int& b){
+    return a > b;
+}
 int main() {
 
 //    !!! 单词计数， 其中关注一下如何获取 str 的size问题，具体见笔记
@@ -236,5 +239,54 @@ int main() {
     }
 
 
+//    !!! multimap 中查找元素, 相同元素都是相邻存储的
+    pIndexofTest(14);
+    {
+        multimap <string, int> word_count{{"a", 1}, {"a", 11}, {"a", 333}, {"b", 2}};
+        auto fd = word_count.find("a");
+        auto count = word_count.count("a");
+        while (count--){
+            cout << fd->first << " " << fd->second << endl;
+            fd++;
+        }
+    }
+
+//    !!! lower_bound upper_bound 1 .用这两个操作得到一个迭代器范围. 2.有可能返回一个尾后指针：找最大元素的upper_bound, 找容器中不存在的，且大于容器中所有元素的lower_bound  3.关键字不再容器中，两个操作指向的迭代器相同，且指向该元素应该插入的位置
+    pIndexofTest(15);
+    {
+        multimap <string, int> word_count{{"a", 1}, {"a", 11}, {"a", 333}, {"b", 2}};
+        for (auto bg = word_count.lower_bound("a"), end = word_count.upper_bound("a"); bg != end; bg++) {
+            cout << bg->first << " " << bg->second << endl;
+
+        }
+    }
+
+//    !!! equal_range 返回一个迭代器，first 第一个匹配的元素， 第二个指向最后一个匹配的之后一个元素；
+    pIndexofTest(16);
+    {
+        multimap <string, int> word_count{{"a", 1}, {"a", 11}, {"a", 333}, {"b", 2}};
+        for (auto pos = word_count.equal_range("a"); pos.first != pos.second; pos.first++) {
+            cout << pos.first->first << " " << pos.first->second << endl;
+        }
+    }
+
+//    ! map 从定义比较函数
+    pIndexofTest(17);
+    {
+//        map <int, string, decltype(cmp)* > istrmap{{1, "a"}, {2, "b"}, {3, "c"}};
+//        for (auto p : istrmap) {
+//            cout << p.first << " " << p.second << endl;
+//
+//        }
+
+        set <int, decltype(cmp)*> iset(cmp);
+        iset.insert(1);
+        iset.insert(3);
+        iset.insert(2);
+        iset.insert(5);
+        for (auto p : iset) {
+            cout << p << endl;
+        }
+    }
     return 0;
 }
