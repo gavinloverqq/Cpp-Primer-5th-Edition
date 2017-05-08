@@ -81,7 +81,7 @@ private:
 
 };
 
-// !!! (阅读p248)   const 在函数名前,与后 : const只加在成员函数的后面,表示此成员函数是只读函数,函数内不能修改成员变量的值,在后面表示返回的值是个const的值
+// !!! (阅读p248)   const 在函数名前,与后 : const只加在成员函数的后面,表示此成员函数是只读函数,函数内不能修改成员变量的值,在后面表示返回的值是个const的值,常量对象会调用此函数。所以也叫常函数
 class C6{
 public:
     C6(){}
@@ -150,10 +150,10 @@ void exFunc3(vector <int>* pVec){
     delete pVec;
 }
 
-shared_ptr<vector<int>> exSmartPoint(){
-    return make_shared <vector<int>>();
+shared_ptr< vector<int> > exSmartPoint(){
+    return make_shared <vector<int> >();
 }
-void exSmartPoint2(istream& is,shared_ptr<vector<int>> sPvec){
+void exSmartPoint2(istream& is,shared_ptr<vector<int> > sPvec){
     int t;
     cout << " input 999 to quit" << endl;
     while (is >> t){
@@ -162,7 +162,7 @@ void exSmartPoint2(istream& is,shared_ptr<vector<int>> sPvec){
         sPvec->push_back(t);
     }
 }
-void exSmartPoint3(shared_ptr<vector<int>> sPvec){
+void exSmartPoint3(shared_ptr<vector<int> > sPvec){
     for(auto a : *sPvec)
         cout << a << " ";
     cout << endl;
@@ -174,7 +174,7 @@ void process(shared_ptr<int> ptr){
 }
 
 
-//接收指针参数的智能指针构造函数是explicit的，因此不能将一个内置指针隐式转换为一个智能指针 必须使用直接初始化形式
+// ！！！接收指针参数的智能指针构造函数是explicit的，因此不能将一个内置指针隐式转换为一个智能指针 必须使用直接初始化形式
 shared_ptr<int> clone(int p){
 //    return new int(p);//错误，此处会发生隐士转换为shared_ptr<int>
 }
@@ -299,7 +299,7 @@ int main() {
 //        *p = "hhhh";
         cout << *p << endl;
 
-        shared_ptr <string> p1 = make_shared <string> (10,'x');
+        shared_ptr <string> p1 = make_shared <string> (10, 'x');
 //        shared_ptr <string> p1 = make_shared <string> (10,"x");//error: invalid conversion from ‘const char*’ to ‘char’ [
         cout << *p1 << endl;
 
