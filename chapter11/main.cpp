@@ -288,5 +288,22 @@ int main() {
             cout << p << endl;
         }
     }
+
+//    ！！！ 单词计数， 无序容器 (输出不在是字典序)
+    pIndexofTest(18);
+    {
+        unordered_map<string, size_t> word_count;
+        string str[10] = {"asc", "sddf", "key", "word", "key", "words", "sss", "cc", "ssd", "dd"};
+        for (int i = 0; i < sizeof(str) / sizeof(str[0]) ; ++i) {
+            ++word_count[str[i]];
+        }
+        for (const auto &w : word_count) {
+            cout << w.first << " " << w.second << endl;
+        }
+//        for (int j = 0; j < sizeof(str) / sizeof(str[0]); ++j) {
+//            cout << str[j] << " " << word_count[str[j]] << endl;
+//        }
+
+    }
     return 0;
 }
