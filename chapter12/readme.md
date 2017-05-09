@@ -37,7 +37,7 @@
 ```
 
 
-12. 如果eq函数是非const，注意右值绑定到非const引用的错误
+12. 如果eq函数是非const，注意右值(常量、表达式、函数返回值等)绑定到非const引用的错误,因为把右值绑定到非const引用上，就有可能修改右值（而右值是不允许修改的） 
 ``` error: invalid initialization of non-const reference of type ‘StrBlobPtr&’ from an rvalue of type ‘StrBlobPtr’ ```
 
 参考: 
@@ -54,3 +54,4 @@
 ---
 add:
 1. 接收指针参数的智能指针构造函数是explicit的，因此不能将一个内置指针隐式转换为一个智能指针 必须使用直接初始化形式
+2. 如果只能指针管理的不是new分配的内存，需要给他传递一个删除器

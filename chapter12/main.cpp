@@ -386,8 +386,8 @@ int main() {
 
 //        只有单一初始化器才能使用auto
         auto pa = new auto(5);
-        auto pa2 = new auto({1,2,3});
-        auto pa3 = new auto{1,2,3};//此处与书中描述不一致
+//        auto pa2 = new auto({1,2,3});
+//        auto pa3 = new auto{1,2,3};//此处与书中描述不一致
 
 //        动态分配的const对象,动态分配的对象必须进行初始化
         const int* cntPi = new const int(44);
@@ -614,6 +614,9 @@ int main() {
         char* pch = new char[0];//此处类似于尾后指针，不能对长度为0的动态数组解引用
 
         delete [] pi1;//delete数组忘记括号对，以及delete单一对象使用了括号对，结果是未定义的;delete动态数组是逆序delete
+
+        int *v = new int;
+        delete [] v;//delete 不是动态数组而是一个普通指针 会warning
     }
 
 //    !!智能指针与动态数组
