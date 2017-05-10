@@ -10,7 +10,7 @@
 #include <list>
 
 using namespace std;
-
+// 可以直接用initializer_list 初始化 vector
 void foo(initializer_list<string> strIni){
     vector <string> strVec(strIni);
     for (auto p : strVec) {
