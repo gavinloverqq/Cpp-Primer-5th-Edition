@@ -104,6 +104,7 @@ private:
     std::string* ps;
     int i;
 };
+
 //赋值运算符需要注意两点：
 //1.如果将一个对象赋值给他自生，必须能正确工作
 //2.大多数赋值运算符组合了析构函数和拷贝构造函数的工作
@@ -392,6 +393,7 @@ int main() {
         Numbered::count = 0;
         Numbered a,b,c;
         b = a, c = b;//拷贝与拷贝构造函数的不同！！！
+        cout << "start func" << endl;
         fNum(a);
         fNum(b);
         fNum(c);
@@ -404,6 +406,7 @@ int main() {
     {
         Numbered::count = 0;
         Numbered a,b = a, c = a;//b,c不会调用构造函数,不会调用赋值运算，只调用拷贝构造函数
+        cout << "start func" << endl;
         fNum(a);//函数传参数，不会去调用构造函数，而是调用拷贝构造函数！！！
         fNum(b);
         fNum(c);
