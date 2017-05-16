@@ -278,7 +278,7 @@ StrBlobPtr StrBlob::end(){
     auto ret = StrBlobPtr(*this ,data->size());
     return ret;
 }
-//注意此处必须使用const引用，因为函数返回值是右值，右值无法绑定到非const上
+//注意此处必须使用const引用，因为函数返回值是右值，右值无法绑定到非const上,注意看第588行的使用！！！
 bool eq(const StrBlobPtr& sbp1,const StrBlobPtr& sbp2){
 //bool eq(StrBlobPtr& sbp1,StrBlobPtr& sbp2){
     auto p1 = sbp1.wptr.lock();

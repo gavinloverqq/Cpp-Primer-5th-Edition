@@ -38,6 +38,7 @@
 
 
 12. 如果eq函数是非const，注意右值(常量、表达式、函数返回值等)绑定到非const引用的错误,因为把右值绑定到非const引用上，就有可能修改右值（而右值是不允许修改的） 
+也就是说一个函数如果参数是 引用类型 ：例如：eq（strBlobPtr &， strBlobPtr&）那么这个函数是不能接受 右值为参数的 比如左边的函数就无法这样调用 eq（s.begin(), s.end()）,因为函数调用是右值
 ``` error: invalid initialization of non-const reference of type ‘StrBlobPtr&’ from an rvalue of type ‘StrBlobPtr’ ```
 
 参考: 
