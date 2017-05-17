@@ -7,12 +7,34 @@
 
 #include <memory>
 #include <string>
+#include <utility>
+
 
 class StrVec{
 public:
     StrVec():elements(nullptr),first_free(nullptr),cap(nullptr){}
     StrVec(const StrVec&);
+
+//    移动构造函数
+    StrVec(StrVec &&s) noexcept
+        :elements(s.elements), first_free(s.first_free), cap(s.cap){
+        s.elements = s.first_free = s.cap = nullptr;
+    }
+
     StrVec& operator =(const StrVec&);
+
+//    移动赋值运算符
+    StrVec& operator = (StrVec &&rhs) noexcept{
+        if(this != &rhs){//检测自赋值问题
+            free();
+            elements = rhs.elements;
+            first_free = rhs.first_free;
+            cap = rhs.cap;
+            rhs.elements = rhs.cap = rhs.first_free = nullptr;
+        }
+        return *this;
+    }
+
     ~StrVec();
 
     void push_back(const std::string&);
@@ -48,7 +70,7 @@ std::pair<std::string*, std::string* > StrVec::alloc_N_copy
         (const std::string* b, const std::string* e){
     auto data = alloc.allocate(e - b);
     return {data, uninitialized_copy(b, e, data)};
-};
+}
 
 void StrVec::free(){
     if(elements){
@@ -78,7 +100,19 @@ StrVec& StrVec::operator= (const StrVec& s) {
 }
 
 void StrVec::reallocate() {
+    auto newcapacity = size() ? 2 * size() : 1;
+    auto newdata = alloc.allocate(newcapacity);
 
+    auto dest = newdata;
+    auto elem = elements;
+
+    for (size_t i = 0; i != size(); ++i) {
+        alloc.construct(dest++, std::move(*elem++));
+    }
+    free();
+    elements = newdata;
+    first_free = dest;
+    cap = elements + newcapacity;
 }
 
 #endif //CHAPTER13_STRVEC_H

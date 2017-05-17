@@ -1,7 +1,9 @@
 #include <iostream>
 #include <vector>
 #include <memory>
+#include <utility>
 #include "messageAndFolder.h"
+//#include "StrVec.h"
 using namespace std;
 //使用 ! 表示重要程度,! 越多越重要
 //便于查看输出结果的分割显示函数
@@ -278,6 +280,10 @@ public:
     HasPtr4(const std::string& s = std::string()):ps(new std::string(s)),i(0),use(new std::size_t(1)){}
     HasPtr4(const HasPtr4& hp):ps(hp.ps),i(hp.i),use(hp.use){++*use;}
 
+//    移动构造函数 (定义了此函数，下面的赋值构造函数也实现了移动赋值功能)
+    HasPtr4(HasPtr4 &&p) noexcept :ps(p.ps), i(p.i){p.ps = nullptr;}
+
+
 //    拷贝并交换的技术!!!异常安全，能正确处理自赋值
     HasPtr4& operator = (HasPtr4 hp){
         swap(hp,*this);//hp现在指向本对象曾经使用过的内存
@@ -310,7 +316,13 @@ void swap(HasPtr4& p1, HasPtr4& p2){
     swap(p1.i, p2.i);
 }
 
-
+class Foo{
+public:
+    Foo() = default;
+    Foo(const Foo&){
+        cout << "foo" << endl;
+    }
+};
 
 int main() {
 
@@ -424,5 +436,30 @@ int main() {
         cout << "h2: " << *h2 << endl;
     }
 
+//    !! 右值引用,
+    pIndexofTest(9);
+    {
+        int &&r1 = 44;
+//        int &&r2 = r1;  //error: rvalue reference to type 'int' cannot bind to lvalue of type 'int'
+        const int & r4 = r1;// 注意和上面的区别，右值可以绑定到const &上
+        int &&r3 = std::move(r1);
+    }
+
+//    !!! 没有移动构造函数， 右值也被拷贝
+    pIndexofTest(10);
+    {
+        Foo x;
+        Foo y(x);// x是左值，拷贝构造函数
+        Foo z(std::move(x));// 调用拷贝构造函数，未定义移动构造函数
+    }
+
+
+//    ！！！ 拷贝并交换赋值运算符和移动操作
+    pIndexofTest(11);
+    {
+        HasPtr4 hp, hp2;
+        hp = hp2;//拷贝构造函数
+        hp = std::move(hp2);//移动构造函数
+    }
     return 0;
 }

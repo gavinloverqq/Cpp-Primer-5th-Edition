@@ -34,11 +34,8 @@ public:
     }
 
     void swap(Message& lhs, Message& rhs);
-
     void save(Folder& f);
-
     void remove(Folder& f);
-
     void addFolder(Folder* f){
         folders.insert(f);
     }
@@ -54,6 +51,7 @@ private:
 
     void removeFromFolders();
 };
+
 
 
 class Folder{
@@ -93,42 +91,41 @@ private:
     std::set <Message*> msg;
 };
 
+// 下面几个函数必须定义在Folder 类下面，否则发生错误 error：member access into incomplete type 'Folder'
 void Message::swap(Message& lhs, Message& rhs){
-        using std::swap;
-        for (auto f: lhs.folders)
-            f->remMsg(&lhs);
-        for (auto f: lhs.folders)
-            f->remMsg(&rhs);
-        swap(lhs.folders, rhs.folders);
-        swap(lhs.contents, rhs.contents);
-        for (auto f: lhs.folders)
-            f->addMsg(&lhs);
-        for (auto f: lhs.folders)
-            f->addMsg(&rhs);
-    }
+    using std::swap;
+    for (auto f: lhs.folders)
+        f->remMsg(&lhs);
+    for (auto f: lhs.folders)
+        f->remMsg(&rhs);
+    swap(lhs.folders, rhs.folders);
+    swap(lhs.contents, rhs.contents);
+    for (auto f: lhs.folders)
+        f->addMsg(&lhs);
+    for (auto f: lhs.folders)
+        f->addMsg(&rhs);
+}
 
 void Message::save(Folder& f){
     folders.insert(&f);
     f.addMsg(this);
 }
 
-
 void Message::remove(Folder& f){
     folders.erase(&f);
     f.remMsg(this);
 }
 
- void Message::addToFolder(const Message& m){
-        for(auto f : m.folders)
-            f->addMsg(this);
-    }
+void Message::addToFolder(const Message& m){
+    for(auto f : m.folders)
+        f->addMsg(this);
+}
 
 void Message::removeFromFolders(){
     for (auto f : folders) {
         f->remMsg(this);
     }
 }
-
 
 
 #endif //CHAPTER13_MESSAGE_H
