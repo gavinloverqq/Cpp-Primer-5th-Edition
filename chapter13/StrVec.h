@@ -9,6 +9,7 @@
 #include <string>
 #include <utility>
 
+using namespace std;
 
 class StrVec{
 public:
@@ -38,6 +39,8 @@ public:
     ~StrVec();
 
     void push_back(const std::string&);
+    void push_back(std::string&&);//接受一个右值
+
     size_t size() const { return first_free - elements;}
     size_t capacity()const { return cap - first_free;}
     std::string* begin() const { return elements;}
@@ -64,6 +67,12 @@ private:
 void StrVec::push_back(const std::string& s) {
     chk_n_alloc();
     alloc.construct(first_free++,s);
+}
+
+//右值版本
+void StrVec::push_back(std::string&& s) {
+    chk_n_alloc();
+    alloc.construct(first_free++,std::move(s));
 }
 
 std::pair<std::string*, std::string* > StrVec::alloc_N_copy
@@ -99,19 +108,31 @@ StrVec& StrVec::operator= (const StrVec& s) {
     return *this;
 }
 
+//void StrVec::reallocate() {
+//    auto newcapacity = size() ? 2 * size() : 1;
+//    auto newdata = alloc.allocate(newcapacity);
+//
+//    auto dest = newdata;
+//    auto elem = elements;
+//
+//    for (size_t i = 0; i != size(); ++i) {
+//        alloc.construct(dest++, std::move(*elem++));
+//    }
+//    free();
+//    elements = newdata;
+//    first_free = dest;
+//    cap = elements + newcapacity;
+//}
+
+// 使用移动迭代器
 void StrVec::reallocate() {
     auto newcapacity = size() ? 2 * size() : 1;
-    auto newdata = alloc.allocate(newcapacity);
+    auto first = alloc.allocate(newcapacity);
 
-    auto dest = newdata;
-    auto elem = elements;
-
-    for (size_t i = 0; i != size(); ++i) {
-        alloc.construct(dest++, std::move(*elem++));
-    }
+    auto last = uninitialized_copy(make_move_iterator(begin()), make_move_iterator(end()), first);
     free();
-    elements = newdata;
-    first_free = dest;
+    elements = first;
+    first_free = last;
     cap = elements + newcapacity;
 }
 

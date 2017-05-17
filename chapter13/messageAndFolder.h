@@ -21,6 +21,20 @@ public:
         addToFolder(msg);
     }
 
+//    移动构造函数
+    Message(Message && m) noexcept: contents(std::move(m.contents)){
+        move_Folders(&m);
+    }
+//    移动赋值运算符
+    Message& operator = (Message && rhs){
+        if(&rhs != this){
+            removeFromFolders();
+            contents = std::move(rhs.contents);
+            move_Folders(&rhs);
+        }
+        return *this;
+    }
+
     Message& operator = (const Message& msg){
         removeFromFolders();//并为删除set中folder指针
         this->contents = msg.contents;
@@ -50,6 +64,8 @@ private:
     void addToFolder(const Message& m);
 
     void removeFromFolders();
+
+    void move_Folders(Message *m);
 };
 
 
@@ -127,5 +143,13 @@ void Message::removeFromFolders(){
     }
 }
 
+void Message::move_Folders(Message *m){
+    folders = std::move(m->folders);
+    for (auto f : folders) {
+        f->remMsg(m);
+        f->addMsg(m);
+    }
+    m->folders.clear();
+}
 
 #endif //CHAPTER13_MESSAGE_H

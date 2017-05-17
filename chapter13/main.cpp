@@ -2,6 +2,7 @@
 #include <vector>
 #include <memory>
 #include <utility>
+#include <algorithm>
 #include "messageAndFolder.h"
 //#include "StrVec.h"
 using namespace std;
@@ -281,7 +282,7 @@ public:
     HasPtr4(const HasPtr4& hp):ps(hp.ps),i(hp.i),use(hp.use){++*use;}
 
 //    移动构造函数 (定义了此函数，下面的赋值构造函数也实现了移动赋值功能)
-    HasPtr4(HasPtr4 &&p) noexcept :ps(p.ps), i(p.i){p.ps = nullptr;}
+    HasPtr4(HasPtr4 &&p) noexcept :ps(p.ps), i(p.i), use(p.use){p.ps = 0; *p.use = 0;}//注意此处的*p.use = 0
 
 
 //    拷贝并交换的技术!!!异常安全，能正确处理自赋值
@@ -322,7 +323,24 @@ public:
     Foo(const Foo&){
         cout << "foo" << endl;
     }
+
+    Foo sorted() &&;
+    Foo sorted()const &;
+
+private:
+    vector <int> data;
 };
+
+Foo Foo::sorted() && {
+    sort(data.begin(), data.end());
+    return *this;
+}
+//
+Foo Foo::sorted() const & {
+    Foo ret(*this);
+    sort(ret.data.begin(), ret.data.end());
+    return ret;
+}
 
 int main() {
 
