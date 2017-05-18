@@ -373,10 +373,14 @@ int main() {
         ops.insert({"+", [](int a, int b){ return add2(a, b);}});
     }
 
-//    ！！类型转换
+//    ！！类型转换, 显式的类型转换
     pIndexofTest(6);
     {
-
+        int i = 3;
+        if(static_cast<bool>(cin) << i){
+            cout << "xx" << endl;
+            cout << (0 << 3) << " " << (1 << 0) << endl;
+        }
     }
     return 0;
 }
