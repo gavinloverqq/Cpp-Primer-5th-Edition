@@ -46,7 +46,9 @@ public:
 
     std::string isbn() const { return bookNo;}
     virtual double net_price(std::size_t n) const;
-
+    virtual void debug()const {
+        std::cout << price << bookNo << endl;
+    }
 
 protected:
     double price = 0.0;
@@ -67,8 +69,13 @@ public:
     Bulk_quote(const std::string &book, double p, std::size_t qty, double disc):
             Quote(book, p), min_qty(qty), discount(disc){}
 
-
     double net_price(std::size_t) const override ;
+
+//    !!! 回避虚函数机制（练习15.11）
+    void debug()const override {
+        Quote::debug();    // bookNo 是 private 的所以不能直接访问bookNo只能调用基类的debug函数来实现
+        std::cout << min_qty << discount << endl;
+    }
 
 private:
     std::size_t min_qty = 0;
@@ -127,9 +134,87 @@ public:
 //注意static的初始化
 int Base_2::sti = 10;
 
-// ！！放置继承
+// ！！防止继承
 class NoDerived final{};//NoDerived 不能作为基类
 class Last final : public Base_1{}; // Last不能作为基类6
+
+// final override 关键字的使用
+struct B{
+    virtual void f1(int) const ;
+    virtual void f2();
+    void f3();
+};
+struct D1 : B{
+    void f1(int) const override ;
+//    void f2(int) override ;//参数列表不对
+//    void f3() override ;//f3不是虚函数
+//    void f4() override ;//没有这个函数
+};
+struct D2 : B{
+    void f1(int) const final ;//不允许后续其他类覆盖
+};
+struct D3 : D2{
+    void f2();//正确，间接从B继承而来
+//    void f1(int) const ;//错误 D2 已经声明为final
+};
+
+struct Base_s1{
+    virtual void f1(int i = 5){
+        cout << "base" << i << endl;
+    }
+};
+struct Derived_s1 : Base_s1{
+    void f1(int i = 10) override {
+        cout << "derived" << i << endl;
+    }
+};
+
+
+//15.13
+struct Base_s2{
+    Base_s2() = default;
+    Base_s2(string s):name(s){}
+    virtual void p(ostream & os){
+        os << name << "base" << endl;
+    }
+
+private:
+    std::string name;
+};
+struct Derived_s2 : public Base_s2{
+    Derived_s2() = default;
+    Derived_s2(string s): Base_s2(s){}
+//    Derived_s2(string s){
+//        Base_s2(s);
+//    }
+
+    void p(ostream & os) override {
+        Base_s2::p(os);
+        os << "derived " << endl;
+    }
+};
+
+
+struct Base_s3{
+    Base_s3() = default;
+    Base_s3(int i):i(i){}
+
+    virtual void f() = 0;//纯虚函数
+
+private:
+    int i;
+};
+struct Derived_s3 : Base_s3{
+    Derived_s3() = default;
+    Derived_s3(int i, string s) : Base_s3(i), s(s) {}
+
+    void f(){
+        cout << s << endl;
+    }
+
+private:
+    string s;
+};
 
 int main() {
 
@@ -182,5 +267,28 @@ int main() {
         print_total(cout, derived, 10);
     }
 
+//    !!! 虚函数默认实参, 通过基类的指针或者引用调用函数，则使用基类中定义的默认实参。即使运行的是派生类中的函数版本也是如此。
+    pIndexofTest(5);
+    {
+        Derived_s1 d;
+        Base_s1 *b = &d;
+        b->f1();// derived 5
+        d.f1();// derived 10
+    }
+
+//    !!! 回避虚函数机制
+    pIndexofTest(6);
+    {
+        Derived_s2 d("sss");
+        d.p(cout);
+    }
+
+//    ! 纯虚函数
+    pIndexofTest(7);
+    {
+//        Base_s3 s;//error: variable type 'Base_s3' is an abstract class
+        Derived_s3 s(4, "ss");
+        s.f();
+    }
     return 0;
 }
