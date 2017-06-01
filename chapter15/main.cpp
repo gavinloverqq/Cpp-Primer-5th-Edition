@@ -109,21 +109,27 @@ public:
 class Base_2{
 public:
     static int sti;
-//    static void p(){
-//        cout << Base_2::sti << endl;
-//    }
+    static void p(){
+        cout << Base_2::sti << endl;
+    }
 };
 
-//class Derived_2:public Base_2{
-//public:
-//    void f(const Derived_2 & obj){
-////        sti = 10;
-//        Base_2::p();
-//        Derived_2::p();
-//        obj.p();
-//        p();
-//    }
-//};
+class Derived_2 : public Base_2{
+public:
+    void f(const Derived_2 & obj){
+        Base_2::p();
+        Derived_2::p();
+        obj.p();
+        p();
+    }
+};
+
+//注意static的初始化
+int Base_2::sti = 10;
+
+// ！！放置继承
+class NoDerived final{};//NoDerived 不能作为基类
+class Last final : public Base_1{}; // Last不能作为基类6
 
 int main() {
 
@@ -142,15 +148,39 @@ int main() {
 //        Bulk_quote &rb = item;
     }
 
+//    !!! C++规定const静态类成员可以直接初始化，其他非const的静态类成员需要在类声明以外初始化，我们一般选择在类的实现文件中初始化，初始化的方式是书写一遍类型的定义：
     pIndexofTest(1);
     {
-//        Base_2::sti = 10;
         Base_2 b;
-
-//        Base_2::p();
-
-//        Derived_2 obj;
-//        obj.f(obj);
+        Base_2::p();
+        Derived_2 obj;
+        obj.f(obj);
     }
+
+//    ！！ 派生类与基类的转化
+    pIndexofTest(2);
+    {
+        Bulk_quote bulk;
+        Quote *itemP = &bulk;//派生类转化为基类
+//        Bulk_quote *bulkP = itemP;//不能将基类转化为派生类，但是可以通过下面的强制转换
+        Bulk_quote *bulkP = static_cast<Bulk_quote*>(itemP);
+    }
+
+//    对象之间不存在类型转换，下面的例子里bulk部分不会被初始化，会被切掉
+    pIndexofTest(3);
+    {
+        Bulk_quote bulk;
+        Quote item(bulk);//使用 Quote::Quote(const Quote&)构造函数
+        item = bulk;//使用Quote::operator = (const Quote&)
+    }
+
+    pIndexofTest(4);
+    {
+        Quote base("book1", 50);
+        print_total(cout, base, 10);
+        Bulk_quote derived("book2", 50, 5, 0.19);
+        print_total(cout, derived, 10);
+    }
+
     return 0;
 }
