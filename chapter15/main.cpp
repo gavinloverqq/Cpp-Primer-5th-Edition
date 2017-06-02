@@ -216,6 +216,145 @@ private:
     string s;
 };
 
+
+// ！！！ 访问控制, 友元
+class Base_4{
+public:
+    friend class Pal;
+
+protected:
+    int prot_mem;
+};
+class Sneaky : public Base_4{
+    friend void clobber(Sneaky&);
+    friend void clobber(Base_4&);//这个函数不是Base的友元，因此不能访问Base的protected成员
+    int j;
+
+    void f(){//成员函数可以访问
+        prot_mem = j = 10;
+    }
+    int t = prot_mem;
+
+};
+//friend 的错误使用，下面的写法会出现如下错误error: out-of-line definition of 'clobber' does not match any declaration in 'Sneaky'
+//void Sneaky::clobber(Base_4 &b) {
+//    b.prot_mem = 0;
+//}
+//void Sneaky::clobber(Sneaky &s) {
+//    s.j = s.prot_mem = 0;
+//}
+
+void clobber(Base_4 &b) {
+//    b.prot_mem = 0;
+}
+void clobber(Sneaky &s) {
+    s.j = s.prot_mem = 0;
+}
+
+// !!! 友元关系不能继承
+class Pal{
+public:
+    int f(Base_4 b){
+        return b.prot_mem;
+    }
+    int f2(Sneaky s){
+//        return s.j; // 友元不能被继承，无法访问子类的private成员
+    }
+    int f3(Sneaky s){
+        return s.prot_mem;  // 正确Pal是Base的友元 ，只要是A是友元B类的友元，就能访问B类中的成员，即使B类是在继承的子类中
+    }
+};
+
+class DPal : public Pal{
+public:
+    int mem(Base_4 b){
+//        return b.prot_mem;// 错误，友元关系不能继承， DPal类不是Base的友元，无法访问Base中protected的成员
+    }
+};
+
+
+
+//  ！！！ 派生类说明符控制的是派生类用户的权限
+class Base_5{
+public:
+    void pub_mem(){}
+private:
+    char priv_mem;
+protected:
+    int prot_mem;
+};
+struct Pub_Derv : public Base_5{
+    int f(){ return prot_mem;}
+//    char g(){ return priv_mem;}//基类中private的成员不可访问
+
+    void memfcn(Base_5 & b){
+        b = *this;
+    }
+};
+struct Priv_Derv : private Base_5{
+    int f1() const { return prot_mem;}//private不影响派生类的访问权限
+
+    void memfcn(Base_5 & b){
+        b = *this;
+    }
+};
+struct Prot_Derv : protected Base_5{
+    void memfcn(Base_5 & b){
+        b = *this;
+    }
+};
+
+// ！！！ 派生访问说明符控制继承自派生类的新类的访问权限
+class Derived_from_Public : public Pub_Derv{
+    int use_base(){ return prot_mem;}
+    void memfcn(Base_5 & b){
+        b = *this;
+    }
+
+};
+class Derived_from_Private : private Priv_Derv{
+//    int use_base(){ return prot_mem;}// 错误，父类全部是private的
+//    void memfcn(Base_5 & b){
+//        b = *this;//错误，因为Priv)_Derv是private继承Base的，因此Base对于当前类来说是不可见的
+//    }
+};
+
+
+// ！！！ 使用using可以改变个别成员访问级别
+class Base_6{
+public:
+    std::size_t size(){ return n;}
+protected:
+    std::size_t n;
+    string s = "ssss";
+private:
+    int i;
+};
+class Derived_6 : private Base_6{
+public:
+    using Base_6::size;
+//    using Base_6::i;
+    using Base_6::s;
+
+    void f(){
+//        int ival1 = i;
+//        string str = s;
+        cout << s << endl;
+    }
+protected:
+    using Base_6::n;
+private:
+//    using Base_6::s;//写在这里s变成private的
+
+};
+class Derived_from_D6 : public Derived_6{
+public:
+    void f2(){
+        cout << s << endl;//如果注释掉上面的using Base_6::s;则这里会出错，因为Derived_6是private继承的，s变成了private，现在s是public的
+    }
+};
+
+
 int main() {
 
 //    ! 除非特别指出，派生类对象的基类部分执行默认初始化
@@ -290,5 +429,31 @@ int main() {
         Derived_s3 s(4, "ss");
         s.f();
     }
+
+//    派生说明符控制的是派生类的用户
+    pIndexofTest(8);
+    {
+        Pub_Derv d1;
+        Priv_Derv d2;
+        d1.pub_mem();
+//        d2.pub_mem();//继承方式是private的，所以错误
+    }
+
+//    派生类向基类转换的可访问性（书P544）不太懂
+    pIndexofTest(9);
+    {
+        Pub_Derv d1;
+        Priv_Derv d2;
+        Prot_Derv d3;
+        Base_5 *p = &d1;
+//        p = &d2;
+//        p = &d3;
+    }
+
+    {
+        int a[5]={12,34,56,78,90}, *p=a;
+        cout << (*p++) << endl;
+    }
+
     return 0;
 }
